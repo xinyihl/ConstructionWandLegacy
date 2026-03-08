@@ -1,4 +1,4 @@
-# ConstructionWandLgeacy
+# ConstructionWandLegacy
 
 Minecraft 1.12.2 上的 Construction Wand 功能回移植（Forge）。
 
@@ -50,7 +50,7 @@ Minecraft 1.12.2 上的 Construction Wand 功能回移植（Forge）。
 
 ## 配置文件
 
-首次启动后会生成配置文件（Forge 默认 `config/constructionwandlgeacy.cfg`）。
+首次启动后会生成配置文件（Forge 默认 `config/constructionwandlegacy.cfg`）。
 
 ### 可配置项
 

@@ -1,0 +1,57 @@
+item.constructionwandlegacy.stone_wand.name=Stone Wand
+item.constructionwandlegacy.iron_wand.name=Iron Wand
+item.constructionwandlegacy.diamond_wand.name=Diamond Wand
+item.constructionwandlegacy.infinity_wand.name=Infinity Wand
+item.constructionwandlegacy.core_angel.name=Angel Wand Core
+item.constructionwandlegacy.core_destruction.name=Destruction Wand Core
+
+constructionwandlegacy.tooltip.blocks=Max. %d blocks
+constructionwandlegacy.tooltip.shift=Press [SHIFT]
+constructionwandlegacy.tooltip.cores=Wand cores:
+constructionwandlegacy.tooltip.core_tip=Combine the core with your wand in a crafting grid
+
+constructionwandlegacy.option.cores=
+constructionwandlegacy.option.cores.constructionwandlegacy:default=Construction Core
+constructionwandlegacy.option.cores.constructionwandlegacy:default.desc=Extend your building on the side facing you
+constructionwandlegacy.option.cores.constructionwandlegacy:core_angel=§6Angel Core
+constructionwandlegacy.option.cores.constructionwandlegacy:core_angel.desc=Place behind blocks and in mid air
+constructionwandlegacy.option.cores.constructionwandlegacy:core_destruction=§cDestruction Core
+constructionwandlegacy.option.cores.constructionwandlegacy:core_destruction.desc=Destroys blocks on the side facing you
+
+constructionwandlegacy.option.lock=Restriction: 
+constructionwandlegacy.option.lock.horizontal=§aLeft/Right
+constructionwandlegacy.option.lock.horizontal.desc=Build a horizontal column in front of the original block
+constructionwandlegacy.option.lock.vertical=§aUp/Down
+constructionwandlegacy.option.lock.vertical.desc=Build a vertical column in front of the original block
+constructionwandlegacy.option.lock.northsouth=§6North/South
+constructionwandlegacy.option.lock.northsouth.desc=Build a row in N/S direction on top of the original block
+constructionwandlegacy.option.lock.eastwest=§6East/West
+constructionwandlegacy.option.lock.eastwest.desc=Build a row in E/W direction on top of the original block
+constructionwandlegacy.option.lock.nolock=§cNone
+constructionwandlegacy.option.lock.nolock.desc=Extend from any side of the original block
+
+constructionwandlegacy.option.direction=Direction: 
+constructionwandlegacy.option.direction.target=§6Target
+constructionwandlegacy.option.direction.target.desc=Place blocks with same direction as target block
+constructionwandlegacy.option.direction.player=§aPlayer
+constructionwandlegacy.option.direction.player.desc=Place blocks facing the player
+
+constructionwandlegacy.option.replace=Replacement: 
+constructionwandlegacy.option.replace.yes=§aYes
+constructionwandlegacy.option.replace.yes.desc=Replace certain blocks like fluids, snow and tallgrass
+constructionwandlegacy.option.replace.no=§cNo
+constructionwandlegacy.option.replace.no.desc=Don't replace blocks
+
+constructionwandlegacy.option.match=Matching: 
+constructionwandlegacy.option.match.exact=§aExact
+constructionwandlegacy.option.match.exact.desc=Only extend blocks that are exactly the same
+constructionwandlegacy.option.match.similar=§6Similar
+constructionwandlegacy.option.match.similar.desc=Treat similar blocks equally
+constructionwandlegacy.option.match.any=§cAny
+constructionwandlegacy.option.match.any.desc=Extend any block
+
+constructionwandlegacy.option.random=Random: 
+constructionwandlegacy.option.random.yes=§aYes
+constructionwandlegacy.option.random.yes.desc=Place random blocks present in your hotbar
+constructionwandlegacy.option.random.no=§cNo
+constructionwandlegacy.option.random.no.desc=Don't randomize placed blocks

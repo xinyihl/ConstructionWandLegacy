@@ -1,0 +1,57 @@
+item.constructionwandlegacy.stone_wand.name=石制手杖
+item.constructionwandlegacy.iron_wand.name=铁制手杖
+item.constructionwandlegacy.diamond_wand.name=钻石手杖
+item.constructionwandlegacy.infinity_wand.name=无尽手杖
+item.constructionwandlegacy.core_angel.name=天使手杖核心
+item.constructionwandlegacy.core_destruction.name=破坏手杖核心
+
+constructionwandlegacy.tooltip.blocks=最多放置%d个方块
+constructionwandlegacy.tooltip.shift=按 [SHIFT]
+constructionwandlegacy.tooltip.cores=手杖核心:
+constructionwandlegacy.tooltip.core_tip=将手杖核心与手杖组合在一起
+
+constructionwandlegacy.option.cores=
+constructionwandlegacy.option.cores.constructionwandlegacy:default=建筑核心
+constructionwandlegacy.option.cores.constructionwandlegacy:default.desc=在面向你的一侧放置方块
+constructionwandlegacy.option.cores.constructionwandlegacy:core_angel=§6天使核心
+constructionwandlegacy.option.cores.constructionwandlegacy:core_angel.desc=在面向你的方块的背面放置方块，还可以悬空放置方块
+constructionwandlegacy.option.cores.constructionwandlegacy:core_destruction=§c破坏核心
+constructionwandlegacy.option.cores.constructionwandlegacy:core_destruction.desc=破坏面向你一侧的方块
+
+constructionwandlegacy.option.lock=锁定: 
+constructionwandlegacy.option.lock.horizontal=§a左 / 右
+constructionwandlegacy.option.lock.horizontal.desc=在起始方块前方延伸一行水平方块
+constructionwandlegacy.option.lock.vertical=§a上 / 下
+constructionwandlegacy.option.lock.vertical.desc=在起始方块前方延伸一列竖直方块
+constructionwandlegacy.option.lock.northsouth=§6南 / 北
+constructionwandlegacy.option.lock.northsouth.desc=在起始方块上方向南 / 北延伸一行
+constructionwandlegacy.option.lock.eastwest=§6东 / 西
+constructionwandlegacy.option.lock.eastwest.desc=在起始方块上方向东 / 西延伸一行
+constructionwandlegacy.option.lock.nolock=§c无
+constructionwandlegacy.option.lock.nolock.desc=从起始方块的任意一面延伸
+
+constructionwandlegacy.option.direction=方向: 
+constructionwandlegacy.option.direction.target=§6目标
+constructionwandlegacy.option.direction.target.desc=放置与的方块方向与目标方块的方向相同
+constructionwandlegacy.option.direction.player=§a玩家
+constructionwandlegacy.option.direction.player.desc=放置的方块面向玩家
+
+constructionwandlegacy.option.replace=替换: 
+constructionwandlegacy.option.replace.yes=§a是
+constructionwandlegacy.option.replace.yes.desc=替换某些方块，如液体、雪、高草丛
+constructionwandlegacy.option.replace.no=§c否
+constructionwandlegacy.option.replace.no.desc=不替换方块
+
+constructionwandlegacy.option.match=匹配: 
+constructionwandlegacy.option.match.exact=§a精确
+constructionwandlegacy.option.match.exact.desc=仅放置完全相同的方块
+constructionwandlegacy.option.match.similar=§6模糊
+constructionwandlegacy.option.match.similar.desc=相似的方块被认为是相同的(草方块 / 泥土类型)
+constructionwandlegacy.option.match.any=§c任意
+constructionwandlegacy.option.match.any.desc=放置任何方块
+
+constructionwandlegacy.option.random=随机: 
+constructionwandlegacy.option.random.yes=§a是
+constructionwandlegacy.option.random.yes.desc=随机放置快捷栏中的方块
+constructionwandlegacy.option.random.no=§c否
+constructionwandlegacy.option.random.no.desc=不会随机放置方块

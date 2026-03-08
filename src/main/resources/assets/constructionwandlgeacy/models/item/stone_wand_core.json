@@ -1,8 +1,0 @@
-{
-  "parent": "item/handheld",
-  "textures": {
-    "layer0": "constructionwandlgeacy:item/stone_wand",
-    "layer1": "constructionwandlgeacy:item/overlay_core"
-  }
-}
-

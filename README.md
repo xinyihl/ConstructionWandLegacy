@@ -1,4 +1,4 @@
-# ConstructionWandLgeacy
+# ConstructionWandLegacy
 
 Backport of Construction Wand features for Minecraft 1.12.2 (Forge).
 
@@ -50,7 +50,7 @@ Current default interactions:
 
 ## Configuration File
 
-A config file is generated after first launch (Forge default: `config/constructionwandlgeacy.cfg`).
+A config file is generated after first launch (Forge default: `config/constructionwandlegacy.cfg`).
 
 ### Configurable Options
 

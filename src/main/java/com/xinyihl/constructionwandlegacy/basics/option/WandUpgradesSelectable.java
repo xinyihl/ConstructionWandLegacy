@@ -1,0 +1,82 @@
+package com.xinyihl.constructionwandlegacy.basics.option;
+
+import com.xinyihl.constructionwandlegacy.api.IWandUpgrade;
+import net.minecraft.nbt.NBTTagCompound;
+
+public class WandUpgradesSelectable<T extends IWandUpgrade> extends WandUpgrades<T> implements IOption<T> {
+    private byte selector;
+
+    public WandUpgradesSelectable(NBTTagCompound tag, String key, T dval) {
+        super(tag, key, dval);
+    }
+
+    @Override
+    public String getKey() {
+        return key;
+    }
+
+    @Override
+    public String getValueString() {
+        return get().getRegistryName().toString();
+    }
+
+    @Override
+    public void setValueString(String val) {
+        for (byte i = 0; i < upgrades.size(); i++) {
+            if (upgrades.get(i).getRegistryName().toString().equals(val)) {
+                selector = i;
+                serializeSelector();
+                return;
+            }
+        }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return upgrades.size() > 1;
+    }
+
+    @Override
+    public void set(T val) {
+        selector = (byte) upgrades.indexOf(val);
+        fixSelector();
+        serializeSelector();
+    }
+
+    @Override
+    public T get() {
+        fixSelector();
+        return upgrades.get(selector);
+    }
+
+    @Override
+    public T next(boolean dir) {
+        selector += (byte) (dir ? 1 : -1);
+        fixSelector();
+        serializeSelector();
+        return get();
+    }
+
+    private void fixSelector() {
+        if (selector < 0 || selector >= upgrades.size()) {
+            selector = 0;
+        }
+    }
+
+    @Override
+    protected void deserialize() {
+        super.deserialize();
+        selector = tag.getByte(key + "_sel");
+        fixSelector();
+    }
+
+    @Override
+    protected void serialize() {
+        super.serialize();
+        serializeSelector();
+    }
+
+    private void serializeSelector() {
+        tag.setByte(key + "_sel", selector);
+    }
+}
