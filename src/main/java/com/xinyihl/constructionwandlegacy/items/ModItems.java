@@ -21,6 +21,8 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Mod.EventBusSubscriber(modid = Tags.MOD_ID)
 public final class ModItems {
@@ -62,6 +64,7 @@ public final class ModItems {
     }
 
     @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     public static void onItemColor(ColorHandlerEvent.Item event) {
         event.getItemColors().registerItemColorHandler((stack, tintIndex) -> {
             if (!(stack.getItem() instanceof ItemWand) || tintIndex != 1) {
