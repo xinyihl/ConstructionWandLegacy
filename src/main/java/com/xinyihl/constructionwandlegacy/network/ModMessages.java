@@ -1,6 +1,5 @@
 package com.xinyihl.constructionwandlegacy.network;
 
-import com.xinyihl.constructionwandlegacy.Tags;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -13,7 +12,7 @@ public final class ModMessages {
     }
 
     public static void register() {
-        INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(Tags.MOD_ID);
+        INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel("xcwl");
         int packetIndex = 0;
 
         INSTANCE.registerMessage(PacketUndoBlocks.Handler.class, PacketUndoBlocks.class, packetIndex++, Side.CLIENT);
