@@ -7,6 +7,7 @@ import com.xinyihl.constructionwandlegacy.basics.WandUtil;
 import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
 import com.xinyihl.constructionwandlegacy.basics.pool.IPool;
 import com.xinyihl.constructionwandlegacy.basics.pool.OrderedPool;
+import com.xinyihl.constructionwandlegacy.compat.BaublesCompat;
 import com.xinyihl.constructionwandlegacy.containers.ContainerManager;
 import com.xinyihl.constructionwandlegacy.wand.undo.PlaceSnapshot;
 import net.minecraft.block.state.IBlockState;
@@ -117,11 +118,13 @@ public class SupplierInventory implements IWandSupplier {
             return 0;
         }
 
+        ContainerManager containerManager = ConstructionWandLegacy.instance.containerManager;
         List<ItemStack> hotbar = WandUtil.getHotbarWithOffhand(player);
         List<ItemStack> mainInv = WandUtil.getMainInv(player);
 
         count = takeItemsInvList(count, stack, mainInv, false);
         count = takeItemsInvList(count, stack, mainInv, true);
+        count = BaublesCompat.useItems(player, stack, count, containerManager);
         count = takeItemsInvList(count, stack, hotbar, true);
         count = takeItemsInvList(count, stack, hotbar, false);
         return count;
@@ -171,6 +174,8 @@ public class SupplierInventory implements IWandSupplier {
             }
         }
 
+        total += BaublesCompat.countItems(player, requiredStack, containerManager);
+
         return total;
     }
 
@@ -196,5 +201,7 @@ public class SupplierInventory implements IWandSupplier {
                 addBlockStack(inventoryStack);
             }
         }
+
+        BaublesCompat.addMatchingStacks(player, item, this::addBlockStack);
     }
 }
