@@ -1,4 +1,4 @@
-package com.xinyihl.constructionwandlegacy.containers.handlers;
+package com.xinyihl.constructionwandlegacy.compat.containers.handlers;
 
 import com.xinyihl.constructionwandlegacy.api.IContainerHandler;
 import com.xinyihl.constructionwandlegacy.basics.WandUtil;

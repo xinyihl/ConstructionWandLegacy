@@ -14,6 +14,7 @@ Backport of Construction Wand features for Minecraft 1.12.2 (Forge).
 - Angel mode: supports mid-air placement
 - Destruction mode
 - Optional Baubles compatibility: container items equipped in Baubles slots can supply building blocks
+- Optional ProjectE compatibility: A building wand that can directly consume EMC to place blocks
 - Uses an interaction flow close to the original implementation:
   - Placement goes through `ItemBlock.placeBlockAt`
   - Breaking goes through `removedByPlayer` + `onPlayerDestroy`

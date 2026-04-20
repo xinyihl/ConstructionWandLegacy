@@ -14,6 +14,7 @@ Minecraft 1.12.2 上的 Construction Wand 功能回移植（Forge）。
 - 天使模式（Angel）：支持空中放置
 - 破坏模式（Destruction）
 - 可选 Baubles 兼容：饰品栏中已装备的容器物品也可以提供建筑方块
+- 可选 ProjectE 兼容：可以直接消耗 EMC 来建造方块的建筑之杖
 - 使用接近原版的交互链路：
   - 放置走 `ItemBlock.placeBlockAt`
   - 破坏走 `removedByPlayer` + `onPlayerDestroy`

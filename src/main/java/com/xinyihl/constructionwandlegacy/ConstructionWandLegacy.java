@@ -5,8 +5,9 @@ import com.xinyihl.constructionwandlegacy.basics.ReplacementRegistry;
 import com.xinyihl.constructionwandlegacy.basics.config.ConfigServer;
 import com.xinyihl.constructionwandlegacy.client.ClientEvents;
 import com.xinyihl.constructionwandlegacy.client.RenderBlockPreview;
-import com.xinyihl.constructionwandlegacy.containers.ContainerManager;
-import com.xinyihl.constructionwandlegacy.containers.ContainerRegistrar;
+import com.xinyihl.constructionwandlegacy.compat.CompatRegistrar;
+import com.xinyihl.constructionwandlegacy.compat.containers.ContainerManager;
+import com.xinyihl.constructionwandlegacy.compat.inventory.InventoryManager;
 import com.xinyihl.constructionwandlegacy.network.ModMessages;
 import com.xinyihl.constructionwandlegacy.wand.undo.UndoHistory;
 import net.minecraft.util.ResourceLocation;
@@ -29,6 +30,7 @@ public class ConstructionWandLegacy {
     public static Logger LOGGER;
 
     public ContainerManager containerManager;
+    public InventoryManager inventoryManager;
     public UndoHistory undoHistory;
     private CommonEvents commonEvents;
 
@@ -41,6 +43,7 @@ public class ConstructionWandLegacy {
         LOGGER = event.getModLog();
         ConfigServer.sync();
         containerManager = new ContainerManager();
+        inventoryManager = new InventoryManager();
         undoHistory = new UndoHistory();
         commonEvents = new CommonEvents();
         MinecraftForge.EVENT_BUS.register(this);
@@ -56,7 +59,7 @@ public class ConstructionWandLegacy {
     @EventHandler
     public void init(FMLInitializationEvent event) {
         ReplacementRegistry.init();
-        ContainerRegistrar.register();
+        CompatRegistrar.register();
         ModMessages.register();
     }
 

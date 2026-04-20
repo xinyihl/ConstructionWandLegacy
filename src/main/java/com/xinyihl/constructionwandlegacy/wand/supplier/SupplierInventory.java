@@ -7,8 +7,7 @@ import com.xinyihl.constructionwandlegacy.basics.WandUtil;
 import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
 import com.xinyihl.constructionwandlegacy.basics.pool.IPool;
 import com.xinyihl.constructionwandlegacy.basics.pool.OrderedPool;
-import com.xinyihl.constructionwandlegacy.compat.BaublesCompat;
-import com.xinyihl.constructionwandlegacy.containers.ContainerManager;
+import com.xinyihl.constructionwandlegacy.compat.inventory.InventoryManager;
 import com.xinyihl.constructionwandlegacy.wand.undo.PlaceSnapshot;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,7 +20,6 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SupplierInventory implements IWandSupplier {
@@ -53,7 +51,8 @@ public class SupplierInventory implements IWandSupplier {
                 ItemBlock targetItem = (ItemBlock) target.getItem();
                 for (Item item : ReplacementRegistry.getMatchingSet(targetItem)) {
                     if (item instanceof ItemBlock) {
-                        addMatchingStacksFromInventory(item);
+                        InventoryManager inventoryManager = ConstructionWandLegacy.instance.inventoryManager;
+                        inventoryManager.addMatchingStacks(player, item, this::addBlockStack);
                     }
                 }
             }
@@ -68,7 +67,8 @@ public class SupplierInventory implements IWandSupplier {
         ItemStack normalized = stack.copy();
         normalized.setCount(1);
 
-        int count = player.isCreative() ? Integer.MAX_VALUE : countItems(normalized);
+        InventoryManager inventoryManager = ConstructionWandLegacy.instance.inventoryManager;
+        int count = player.isCreative() ? Integer.MAX_VALUE : inventoryManager.countItems(player, normalized);
         if (count > 0) {
             ItemStack key = findTrackedStack(normalized);
             if (key == null) {
@@ -118,65 +118,8 @@ public class SupplierInventory implements IWandSupplier {
             return 0;
         }
 
-        ContainerManager containerManager = ConstructionWandLegacy.instance.containerManager;
-        List<ItemStack> hotbar = WandUtil.getHotbarWithOffhand(player);
-        List<ItemStack> mainInv = WandUtil.getMainInv(player);
-
-        count = takeItemsInvList(count, stack, mainInv, false);
-        count = takeItemsInvList(count, stack, mainInv, true);
-        count = BaublesCompat.useItems(player, stack, count, containerManager);
-        count = takeItemsInvList(count, stack, hotbar, true);
-        count = takeItemsInvList(count, stack, hotbar, false);
-        return count;
-    }
-
-    private int takeItemsInvList(int count, ItemStack requiredStack, List<ItemStack> inventory, boolean container) {
-        ContainerManager containerManager = ConstructionWandLegacy.instance.containerManager;
-
-        for (ItemStack inventoryStack : inventory) {
-            if (count == 0) {
-                break;
-            }
-
-            if (container) {
-                count = containerManager.useItems(player, requiredStack, inventoryStack, count);
-                continue;
-            }
-
-            if (WandUtil.stackEquals(inventoryStack, requiredStack)) {
-                int toTake = Math.min(count, inventoryStack.getCount());
-                inventoryStack.shrink(toTake);
-                count -= toTake;
-                player.inventory.markDirty();
-            }
-        }
-
-        return count;
-    }
-
-    private int countItems(ItemStack requiredStack) {
-        int total = 0;
-        ContainerManager containerManager = ConstructionWandLegacy.instance.containerManager;
-
-        for (ItemStack inventoryStack : WandUtil.getHotbarWithOffhand(player)) {
-            if (WandUtil.stackEquals(inventoryStack, requiredStack)) {
-                total += inventoryStack.getCount();
-            } else {
-                total += containerManager.countItems(player, requiredStack, inventoryStack);
-            }
-        }
-
-        for (ItemStack inventoryStack : WandUtil.getMainInv(player)) {
-            if (WandUtil.stackEquals(inventoryStack, requiredStack)) {
-                total += inventoryStack.getCount();
-            } else {
-                total += containerManager.countItems(player, requiredStack, inventoryStack);
-            }
-        }
-
-        total += BaublesCompat.countItems(player, requiredStack, containerManager);
-
-        return total;
+        InventoryManager inventoryManager = ConstructionWandLegacy.instance.inventoryManager;
+        return inventoryManager.useItems(player, stack, count);
     }
 
     @Nullable
@@ -187,21 +130,5 @@ public class SupplierInventory implements IWandSupplier {
             }
         }
         return null;
-    }
-
-    private void addMatchingStacksFromInventory(Item item) {
-        for (ItemStack inventoryStack : WandUtil.getHotbarWithOffhand(player)) {
-            if (!inventoryStack.isEmpty() && inventoryStack.getItem() == item) {
-                addBlockStack(inventoryStack);
-            }
-        }
-
-        for (ItemStack inventoryStack : WandUtil.getMainInv(player)) {
-            if (!inventoryStack.isEmpty() && inventoryStack.getItem() == item) {
-                addBlockStack(inventoryStack);
-            }
-        }
-
-        BaublesCompat.addMatchingStacks(player, item, this::addBlockStack);
     }
 }

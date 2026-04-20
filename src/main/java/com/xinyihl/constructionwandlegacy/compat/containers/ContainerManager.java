@@ -1,4 +1,4 @@
-package com.xinyihl.constructionwandlegacy.containers;
+package com.xinyihl.constructionwandlegacy.compat.containers;
 
 import com.xinyihl.constructionwandlegacy.api.IContainerHandler;
 import net.minecraft.entity.player.EntityPlayer;

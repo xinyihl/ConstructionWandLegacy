@@ -140,9 +140,13 @@ dependencies {
     // Example of deobfuscating a dependency
     // implementation rfg.deobf('curse.maven:had-enough-items-557549:4543375')
 
+    // Compat
     compileOnly rfg.deobf("curse.maven:baubles-227083:2518667")
-    compileOnly rfg.deobf("curse.maven:botania-225643:3330934")
-    compileOnly rfg.deobf("curse.maven:mekanismceunofficial-840735:5946841")
+    compileOnly rfg.deobf("curse.maven:projecte-226410:2702991")
+
+    // Test
+    //compileOnly rfg.deobf("curse.maven:botania-225643:3330934")
+    //compileOnly rfg.deobf("curse.maven:mekanismceunofficial-840735:5946841")
 }
 
 // Adds Access Transformer files to tasks
