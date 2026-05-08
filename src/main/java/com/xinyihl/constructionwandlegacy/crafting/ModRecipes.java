@@ -64,6 +64,22 @@ public final class ModRecipes {
                 'D', Blocks.DIAMOND_BLOCK,
                 'p', Items.DIAMOND_PICKAXE);
 
+        registerShapedRecipe(event, "core_projecte", new ItemStack(ModItems.CORE_PROJECTE),
+                " PG",
+                "PEP",
+                "GP ",
+                'P', "paneGlass",
+                'G', Items.GLOWSTONE_DUST,
+                'E', Items.EMERALD);
+
+        registerShapedRecipe(event, "core_ae", new ItemStack(ModItems.CORE_AE),
+                " PG",
+                "PCP",
+                "GP ",
+                'P', "paneGlass",
+                'G', Items.QUARTZ,
+                'C', "chest");
+
         event.getRegistry().register(new RecipeWandUpgrade().setRegistryName(ConstructionWandLegacy.loc("wand_upgrade")));
     }
 

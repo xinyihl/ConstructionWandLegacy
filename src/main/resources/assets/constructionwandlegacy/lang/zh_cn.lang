@@ -4,11 +4,14 @@ item.constructionwandlegacy.diamond_wand.name=钻石手杖
 item.constructionwandlegacy.infinity_wand.name=无尽手杖
 item.constructionwandlegacy.core_angel.name=天使手杖核心
 item.constructionwandlegacy.core_destruction.name=破坏手杖核心
+item.constructionwandlegacy.core_projecte.name=ProjectE手杖核心
+item.constructionwandlegacy.core_ae.name=AE手杖核心
 
 constructionwandlegacy.tooltip.blocks=最多放置%d个方块
 constructionwandlegacy.tooltip.shift=按 [SHIFT]
 constructionwandlegacy.tooltip.cores=手杖核心:
 constructionwandlegacy.tooltip.core_tip=将手杖核心与手杖组合在一起
+constructionwandlegacy.tooltip.ae_bound=已绑定ME网络
 
 constructionwandlegacy.option.cores=
 constructionwandlegacy.option.cores.constructionwandlegacy:default=建筑核心
@@ -17,6 +20,12 @@ constructionwandlegacy.option.cores.constructionwandlegacy:core_angel=§6天使�
 constructionwandlegacy.option.cores.constructionwandlegacy:core_angel.desc=在面向你的方块的背面放置方块，还可以悬空放置方块
 constructionwandlegacy.option.cores.constructionwandlegacy:core_destruction=§c破坏核心
 constructionwandlegacy.option.cores.constructionwandlegacy:core_destruction.desc=破坏面向你一侧的方块
+constructionwandlegacy.option.cores.constructionwandlegacy:core_projecte=§9ProjectE核心
+constructionwandlegacy.option.cores.constructionwandlegacy:core_projecte.desc=使用ProjectE的EMC放置方块
+constructionwandlegacy.option.cores.constructionwandlegacy:core_projecte.bound=ProjectE知识已连接！
+constructionwandlegacy.option.cores.constructionwandlegacy:core_ae=§bAE核心
+constructionwandlegacy.option.cores.constructionwandlegacy:core_ae.desc=从ME网络调用物品放置方块（无视无线距离）
+constructionwandlegacy.option.cores.constructionwandlegacy:core_ae.bound=已绑定ME网络！
 
 constructionwandlegacy.option.lock=锁定: 
 constructionwandlegacy.option.lock.horizontal=§a左 / 右

@@ -49,7 +49,12 @@ public class WandJob {
         this.options = new WandOptions(wand);
         this.snapshots = new ArrayList<>();
 
-        this.wandSupplier = options.random.get() ? new SupplierRandom(player, options) : new SupplierInventory(player, options);
+        IWandSupplier coreSupplier = options.cores.get().createSupplier(player, options);
+        if (coreSupplier != null) {
+            this.wandSupplier = coreSupplier;
+        } else {
+            this.wandSupplier = options.random.get() ? new SupplierRandom(player, options) : new SupplierInventory(player, options);
+        }
         this.wandAction = options.cores.get().getWandAction();
 
         wandSupplier.getSupply(getTargetItem(world, rayTraceResult));

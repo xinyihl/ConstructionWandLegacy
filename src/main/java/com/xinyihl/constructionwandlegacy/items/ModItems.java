@@ -4,8 +4,10 @@ import com.xinyihl.constructionwandlegacy.ConstructionWandLegacy;
 import com.xinyihl.constructionwandlegacy.Tags;
 import com.xinyihl.constructionwandlegacy.basics.config.ConfigServer;
 import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
+import com.xinyihl.constructionwandlegacy.items.core.ItemCoreAE;
 import com.xinyihl.constructionwandlegacy.items.core.ItemCoreAngel;
 import com.xinyihl.constructionwandlegacy.items.core.ItemCoreDestruction;
+import com.xinyihl.constructionwandlegacy.items.core.ItemCoreProjectE;
 import com.xinyihl.constructionwandlegacy.items.wand.ItemWand;
 import com.xinyihl.constructionwandlegacy.items.wand.ItemWandBasic;
 import com.xinyihl.constructionwandlegacy.items.wand.ItemWandInfinity;
@@ -19,6 +21,7 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -33,6 +36,8 @@ public final class ModItems {
 
     public static Item CORE_ANGEL;
     public static Item CORE_DESTRUCTION;
+    public static Item CORE_PROJECTE;
+    public static Item CORE_AE;
 
     private ModItems() {
     }
@@ -46,6 +51,13 @@ public final class ModItems {
 
         CORE_ANGEL = register(event, "core_angel", new ItemCoreAngel(), CreativeTabs.MISC);
         CORE_DESTRUCTION = register(event, "core_destruction", new ItemCoreDestruction(), CreativeTabs.MISC);
+
+        if (Loader.isModLoaded("projecte")) {
+            CORE_PROJECTE = register(event, "core_projecte", new ItemCoreProjectE(), CreativeTabs.MISC);
+        }
+        if (Loader.isModLoaded("appliedenergistics2")) {
+            CORE_AE = register(event, "core_ae", new ItemCoreAE(), CreativeTabs.MISC);
+        }
 
         ConfigServer.registerWandProperties(WAND_STONE, new ConfigServer.WandProperties(9, 131, 16, 9, true));
         ConfigServer.registerWandProperties(WAND_IRON, new ConfigServer.WandProperties(27, 250, 32, 27, true));
@@ -61,6 +73,13 @@ public final class ModItems {
         registerModel(WAND_INFINITY);
         registerModel(CORE_ANGEL);
         registerModel(CORE_DESTRUCTION);
+
+        if (Loader.isModLoaded("projecte")) {
+            registerModel(CORE_PROJECTE);
+        }
+        if (Loader.isModLoaded("appliedenergistics2")) {
+            registerModel(CORE_AE);
+        }
     }
 
     @SubscribeEvent

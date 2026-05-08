@@ -4,11 +4,14 @@ item.constructionwandlegacy.diamond_wand.name=Diamond Wand
 item.constructionwandlegacy.infinity_wand.name=Infinity Wand
 item.constructionwandlegacy.core_angel.name=Angel Wand Core
 item.constructionwandlegacy.core_destruction.name=Destruction Wand Core
+item.constructionwandlegacy.core_projecte.name=ProjectE Wand Core
+item.constructionwandlegacy.core_ae.name=AE Wand Core
 
 constructionwandlegacy.tooltip.blocks=Max. %d blocks
 constructionwandlegacy.tooltip.shift=Press [SHIFT]
 constructionwandlegacy.tooltip.cores=Wand cores:
 constructionwandlegacy.tooltip.core_tip=Combine the core with your wand in a crafting grid
+constructionwandlegacy.tooltip.ae_bound=Bound to ME Network
 
 constructionwandlegacy.option.cores=
 constructionwandlegacy.option.cores.constructionwandlegacy:default=Construction Core
@@ -17,6 +20,12 @@ constructionwandlegacy.option.cores.constructionwandlegacy:core_angel=§6Angel C
 constructionwandlegacy.option.cores.constructionwandlegacy:core_angel.desc=Place behind blocks and in mid air
 constructionwandlegacy.option.cores.constructionwandlegacy:core_destruction=§cDestruction Core
 constructionwandlegacy.option.cores.constructionwandlegacy:core_destruction.desc=Destroys blocks on the side facing you
+constructionwandlegacy.option.cores.constructionwandlegacy:core_projecte=§9ProjectE Core
+constructionwandlegacy.option.cores.constructionwandlegacy:core_projecte.desc=Place blocks using EMC from ProjectE
+constructionwandlegacy.option.cores.constructionwandlegacy:core_projecte.bound=ProjectE knowledge linked!
+constructionwandlegacy.option.cores.constructionwandlegacy:core_ae=§bAE Core
+constructionwandlegacy.option.cores.constructionwandlegacy:core_ae.desc=Place blocks from your ME Network (ignores wireless range)
+constructionwandlegacy.option.cores.constructionwandlegacy:core_ae.bound=Bound to ME Network!
 
 constructionwandlegacy.option.lock=Restriction: 
 constructionwandlegacy.option.lock.horizontal=§aLeft/Right

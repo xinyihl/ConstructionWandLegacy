@@ -1,16 +1,20 @@
 package com.xinyihl.constructionwandlegacy.items.wand;
 
+import appeng.tile.networking.TileController;
 import com.xinyihl.constructionwandlegacy.ConstructionWandLegacy;
 import com.xinyihl.constructionwandlegacy.Tags;
 import com.xinyihl.constructionwandlegacy.api.IWandCore;
 import com.xinyihl.constructionwandlegacy.basics.option.IOption;
 import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
+import com.xinyihl.constructionwandlegacy.compat.inventory.handlers.HandlerAE;
+import com.xinyihl.constructionwandlegacy.items.core.ItemCoreAE;
 import com.xinyihl.constructionwandlegacy.wand.WandJob;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
@@ -24,6 +28,8 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Optional;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -40,6 +46,20 @@ public abstract class ItemWand extends Item {
         }
         WandOptions options = new WandOptions(stack);
         return options.cores.get().getColor() > -1;
+    }
+
+    @Optional.Method(modid = "appliedenergistics2")
+    private boolean bindAE(ItemStack stack, EntityPlayer player, World world, BlockPos pos) {
+        WandOptions options = new WandOptions(stack);
+        if (options.cores.get() instanceof ItemCoreAE) {
+            TileEntity tile = world.getTileEntity(pos);
+            if (tile instanceof TileController) {
+                HandlerAE.storeBinding(options, pos, world.provider.getDimension());
+                player.sendStatusMessage(new TextComponentTranslation(Tags.MOD_ID + ".option.cores." + options.cores.get().getRegistryName().toString() + ".bound"), true);
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void optionMessage(IOption<?> option, List<String> out) {
@@ -76,6 +96,13 @@ public abstract class ItemWand extends Item {
         }
 
         ItemStack stack = player.getHeldItem(hand);
+
+        if (Loader.isModLoaded("appliedenergistics2")) {
+            if (bindAE(stack, player, world, pos)) {
+                return EnumActionResult.SUCCESS;
+            }
+        }
+
         if (player.isSneaking()) {
             return ConstructionWandLegacy.instance.undoHistory.undo(player) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
         }
@@ -123,6 +150,11 @@ public abstract class ItemWand extends Item {
                 for (IWandCore core : options.cores.getUpgrades()) {
                     tooltip.add(I18n.translateToLocal(options.cores.getKeyTranslation() + "." + core.getRegistryName().toString()));
                 }
+            }
+
+            // Show AE binding status
+            if (options.cores.get() instanceof ItemCoreAE && HandlerAE.hasBinding(options)) {
+                tooltip.add(TextFormatting.GREEN + I18n.translateToLocal(Tags.MOD_ID + ".tooltip.ae_bound"));
             }
         } else {
             tooltip.add(TextFormatting.GRAY + String.format(I18n.translateToLocal(Tags.MOD_ID + ".tooltip.blocks"), limit));
