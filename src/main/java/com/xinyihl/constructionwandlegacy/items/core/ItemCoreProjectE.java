@@ -10,7 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 public class ItemCoreProjectE extends ItemCore {
     @Override
     public int getColor() {
-        return 0x3A6E9E;
+        return 0xFF3CF4;
     }
 
     @Override
