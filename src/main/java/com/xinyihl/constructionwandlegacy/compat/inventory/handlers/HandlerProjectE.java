@@ -55,4 +55,17 @@ public class HandlerProjectE implements IInventoryHandler {
             }
         }
     }
+
+    @Optional.Method(modid = "projecte")
+    public void refund(EntityPlayer player, ItemStack stack) {
+        IKnowledgeProvider knowledge = ProjectEAPI.getTransmutationProxy().getKnowledgeProviderFor(player.getPersistentID());
+        IEMCProxy emcProxy = ProjectEAPI.getEMCProxy();
+        if (knowledge.hasKnowledge(stack) && emcProxy.hasValue(stack)) {
+            long value = emcProxy.getValue(stack) * stack.getCount();
+            knowledge.setEmc(knowledge.getEmc() + value);
+            if (player instanceof EntityPlayerMP) {
+                knowledge.sync((EntityPlayerMP) player);
+            }
+        }
+    }
 }

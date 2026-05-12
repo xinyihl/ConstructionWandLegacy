@@ -1,8 +1,11 @@
 package com.xinyihl.constructionwandlegacy.wand.undo;
 
+import com.xinyihl.constructionwandlegacy.api.SourceType;
 import com.xinyihl.constructionwandlegacy.basics.WandUtil;
 import com.xinyihl.constructionwandlegacy.basics.config.ConfigServer;
 import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
+import com.xinyihl.constructionwandlegacy.compat.inventory.handlers.HandlerAE;
+import com.xinyihl.constructionwandlegacy.compat.inventory.handlers.HandlerProjectE;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
@@ -26,22 +29,26 @@ public class PlaceSnapshot implements ISnapshot {
     private final ItemBlock item;
     private final IBlockState supportingBlock;
     private final boolean targetMode;
+    private final SourceType sourceType;
     private IBlockState block;
 
-    public PlaceSnapshot(IBlockState block, BlockPos pos, ItemStack itemStack, ItemBlock item, @Nullable IBlockState supportingBlock, boolean targetMode) {
+    public PlaceSnapshot(IBlockState block, BlockPos pos, ItemStack itemStack, ItemBlock item,
+                         @Nullable IBlockState supportingBlock, boolean targetMode, SourceType sourceType) {
         this.block = block;
         this.pos = pos;
         this.itemStack = itemStack;
         this.item = item;
         this.supportingBlock = supportingBlock;
         this.targetMode = targetMode;
+        this.sourceType = sourceType;
     }
 
     @Nullable
     public static PlaceSnapshot get(World world, EntityPlayer player, RayTraceResult rayTraceResult,
                                     BlockPos pos, ItemStack itemStack,
                                     @Nullable IBlockState supportingBlock,
-                                    @Nullable WandOptions options) {
+                                    @Nullable WandOptions options,
+                                    SourceType sourceType) {
         if (!(itemStack.getItem() instanceof ItemBlock)) {
             return null;
         }
@@ -51,7 +58,7 @@ public class PlaceSnapshot implements ISnapshot {
         if (state == null || !ConfigServer.isPlacementAllowed(itemStack, state)) {
             return null;
         }
-        return new PlaceSnapshot(state, pos, itemStack.copy(), item, supportingBlock, targetMode);
+        return new PlaceSnapshot(state, pos, itemStack.copy(), item, supportingBlock, targetMode, sourceType);
     }
 
     @Nullable
@@ -129,6 +136,21 @@ public class PlaceSnapshot implements ISnapshot {
         return world.isBlockModifiable(player, pos);
     }
 
+    private static void refundToInventory(EntityPlayer player, ItemStack refund) {
+        if (!player.inventory.addItemStackToInventory(refund)) {
+            player.dropItem(refund, false);
+        }
+        player.inventory.markDirty();
+    }
+
+    private static void refundToProjectE(EntityPlayer player, ItemStack refund) {
+        new HandlerProjectE().refund(player, refund);
+    }
+
+    private static void refundToAE(EntityPlayer player, ItemStack refund) {
+        new HandlerAE(player).refund(player, refund);
+    }
+
     @Override
     public boolean restore(World world, EntityPlayer player) {
         if (!WandUtil.removeBlock(world, player, block, pos)) {
@@ -137,10 +159,17 @@ public class PlaceSnapshot implements ISnapshot {
 
         if (!player.isCreative()) {
             ItemStack refund = getRequiredItems();
-            if (!player.inventory.addItemStackToInventory(refund)) {
-                player.dropItem(refund, false);
+            switch (sourceType) {
+                case PROJECTE:
+                    refundToProjectE(player, refund);
+                    break;
+                case AE:
+                    refundToAE(player, refund);
+                    break;
+                default:
+                    refundToInventory(player, refund);
+                    break;
             }
-            player.inventory.markDirty();
         }
 
         return true;

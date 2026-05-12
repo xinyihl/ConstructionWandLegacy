@@ -128,4 +128,23 @@ public class HandlerAE implements IInventoryHandler {
             }
         }
     }
+
+    @Optional.Method(modid = "appliedenergistics2")
+    public void refund(EntityPlayer player, ItemStack stack) {
+        IMEMonitor<IAEItemStack> storage = getItemStorage();
+        if (storage != null && this.source != null) {
+            IAEItemStack request = AEItemStack.fromItemStack(stack);
+            if (request != null) {
+                request.setStackSize(stack.getCount());
+                IAEItemStack notInsert = storage.injectItems(request, Actionable.MODULATE, this.source);
+                if (notInsert == null || notInsert.getStackSize() <= 0) {
+                    return;
+                }
+            }
+        }
+        if (!player.inventory.addItemStackToInventory(stack)) {
+            player.dropItem(stack, false);
+        }
+        player.inventory.markDirty();
+    }
 }

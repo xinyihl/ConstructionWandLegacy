@@ -99,7 +99,7 @@ public class SupplierInventory implements IWandSupplier {
                 continue;
             }
 
-            PlaceSnapshot snapshot = PlaceSnapshot.get(world, player, rayTraceResult, pos, stack, supportingBlock, options);
+            PlaceSnapshot snapshot = PlaceSnapshot.get(world, player, rayTraceResult, pos, stack, supportingBlock, options, getSourceType());
             if (snapshot != null) {
                 int remaining = count - 1;
                 itemCounts.put(stack, remaining);

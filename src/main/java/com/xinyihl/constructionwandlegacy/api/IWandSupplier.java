@@ -17,4 +17,8 @@ public interface IWandSupplier {
                                    @Nullable IBlockState supportingBlock);
 
     int takeItemStack(ItemStack stack);
+
+    default SourceType getSourceType() {
+        return SourceType.INVENTORY;
+    }
 }

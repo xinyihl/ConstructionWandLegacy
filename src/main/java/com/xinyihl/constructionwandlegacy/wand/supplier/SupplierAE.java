@@ -1,5 +1,6 @@
 package com.xinyihl.constructionwandlegacy.wand.supplier;
 
+import com.xinyihl.constructionwandlegacy.api.SourceType;
 import com.xinyihl.constructionwandlegacy.basics.WandUtil;
 import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
 import com.xinyihl.constructionwandlegacy.compat.inventory.handlers.HandlerAE;
@@ -14,6 +15,11 @@ public class SupplierAE extends SupplierInventory {
 
     public SupplierAE(EntityPlayer player, WandOptions options) {
         super(player, options);
+    }
+
+    @Override
+    public SourceType getSourceType() {
+        return SourceType.AE;
     }
 
     @Override
