@@ -5,6 +5,7 @@ import com.xinyihl.constructionwandlegacy.basics.WandUtil;
 import com.xinyihl.constructionwandlegacy.basics.config.ConfigServer;
 import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
 import com.xinyihl.constructionwandlegacy.compat.inventory.handlers.HandlerAE;
+import com.xinyihl.constructionwandlegacy.compat.inventory.handlers.HandlerContainer;
 import com.xinyihl.constructionwandlegacy.compat.inventory.handlers.HandlerProjectE;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
@@ -143,6 +144,13 @@ public class PlaceSnapshot implements ISnapshot {
         player.inventory.markDirty();
     }
 
+    private static void refundToInventoryOrContainer(EntityPlayer player, ItemStack refund) {
+        if (new HandlerContainer().tryInsert(player, refund)) {
+            return;
+        }
+        refundToInventory(player, refund);
+    }
+
     private static void refundToProjectE(EntityPlayer player, ItemStack refund) {
         new HandlerProjectE().refund(player, refund);
     }
@@ -167,7 +175,7 @@ public class PlaceSnapshot implements ISnapshot {
                     refundToAE(player, refund);
                     break;
                 default:
-                    refundToInventory(player, refund);
+                    refundToInventoryOrContainer(player, refund);
                     break;
             }
         }

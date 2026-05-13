@@ -8,6 +8,7 @@ import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
 import com.xinyihl.constructionwandlegacy.basics.pool.IPool;
 import com.xinyihl.constructionwandlegacy.basics.pool.OrderedPool;
 import com.xinyihl.constructionwandlegacy.compat.inventory.InventoryManager;
+import com.xinyihl.constructionwandlegacy.compat.inventory.handlers.HandlerContainer;
 import com.xinyihl.constructionwandlegacy.wand.undo.PlaceSnapshot;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,6 +26,7 @@ import java.util.Map;
 public class SupplierInventory implements IWandSupplier {
     protected final EntityPlayer player;
     protected final WandOptions options;
+    protected final HandlerContainer containerHandler;
 
     protected Map<ItemStack, Integer> itemCounts;
     protected IPool<ItemStack> itemPool;
@@ -32,6 +34,7 @@ public class SupplierInventory implements IWandSupplier {
     public SupplierInventory(EntityPlayer player, WandOptions options) {
         this.player = player;
         this.options = options;
+        this.containerHandler = new HandlerContainer();
     }
 
     @Override
@@ -69,6 +72,12 @@ public class SupplierInventory implements IWandSupplier {
 
         InventoryManager inventoryManager = ConstructionWandLegacy.instance.inventoryManager;
         int count = player.isCreative() ? Integer.MAX_VALUE : inventoryManager.countItems(player, normalized);
+
+        // Include bound container items
+        if (!player.isCreative()) {
+            count += containerHandler.countItems(player, normalized, null);
+        }
+
         if (count > 0) {
             ItemStack key = findTrackedStack(normalized);
             if (key == null) {
@@ -118,8 +127,13 @@ public class SupplierInventory implements IWandSupplier {
             return 0;
         }
 
-        InventoryManager inventoryManager = ConstructionWandLegacy.instance.inventoryManager;
-        return inventoryManager.useItems(player, stack, count);
+        // Try container first, then player inventory
+        int remaining = containerHandler.useItems(player, stack, count, null);
+        if (remaining > 0) {
+            InventoryManager inventoryManager = ConstructionWandLegacy.instance.inventoryManager;
+            remaining = inventoryManager.useItems(player, stack, remaining);
+        }
+        return remaining;
     }
 
     @Nullable

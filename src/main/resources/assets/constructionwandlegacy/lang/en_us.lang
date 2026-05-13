@@ -64,3 +64,6 @@ constructionwandlegacy.option.random.yes=§aYes
 constructionwandlegacy.option.random.yes.desc=Place random blocks present in your hotbar
 constructionwandlegacy.option.random.no=§cNo
 constructionwandlegacy.option.random.no.desc=Don't randomize placed blocks
+
+constructionwandlegacy.tooltip.container_bound=Bound to Container
+constructionwandlegacy.tooltip.container_tip=Sneak+right-click a container to bind

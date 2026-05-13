@@ -64,3 +64,6 @@ constructionwandlegacy.option.random.yes=§a是
 constructionwandlegacy.option.random.yes.desc=随机放置快捷栏中的方块
 constructionwandlegacy.option.random.no=§c否
 constructionwandlegacy.option.random.no.desc=不会随机放置方块
+
+constructionwandlegacy.tooltip.container_bound=已绑定容器
+constructionwandlegacy.tooltip.container_tip=潜行右键容器来绑定

@@ -7,6 +7,8 @@ import com.xinyihl.constructionwandlegacy.api.IWandCore;
 import com.xinyihl.constructionwandlegacy.basics.option.IOption;
 import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
 import com.xinyihl.constructionwandlegacy.compat.inventory.handlers.HandlerAE;
+import com.xinyihl.constructionwandlegacy.compat.inventory.handlers.HandlerContainer;
+import com.xinyihl.constructionwandlegacy.items.core.CoreDefault;
 import com.xinyihl.constructionwandlegacy.items.core.ItemCoreAE;
 import com.xinyihl.constructionwandlegacy.wand.WandJob;
 import net.minecraft.client.gui.GuiScreen;
@@ -62,6 +64,22 @@ public abstract class ItemWand extends Item {
         return false;
     }
 
+    private boolean bindContainer(ItemStack stack, EntityPlayer player, World world, BlockPos pos) {
+        WandOptions options = new WandOptions(stack);
+        // Only default core supports container binding
+        if (!(options.cores.get() instanceof CoreDefault)) {
+            return false;
+        }
+        TileEntity tile = world.getTileEntity(pos);
+        if (tile == null) return false;
+        if (!tile.hasCapability(net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)) {
+            return false;
+        }
+        HandlerContainer.storeBinding(options, pos, world.provider.getDimension());
+        player.sendStatusMessage(new TextComponentTranslation(Tags.MOD_ID + ".tooltip.container_bound"), true);
+        return true;
+    }
+
     public static void optionMessage(IOption<?> option, List<String> out) {
         out.add(TextFormatting.AQUA + I18n.translateToLocal(option.getKeyTranslation())
                 + TextFormatting.WHITE + I18n.translateToLocal(option.getValueTranslation()));
@@ -101,6 +119,10 @@ public abstract class ItemWand extends Item {
             if (bindAE(stack, player, world, pos)) {
                 return EnumActionResult.SUCCESS;
             }
+        }
+
+        if (player.isSneaking() && bindContainer(stack, player, world, pos)) {
+            return EnumActionResult.SUCCESS;
         }
 
         if (player.isSneaking()) {
@@ -152,9 +174,12 @@ public abstract class ItemWand extends Item {
                 }
             }
 
-            // Show AE binding status
+            // Show binding status
             if (options.cores.get() instanceof ItemCoreAE && HandlerAE.hasBinding(options)) {
                 tooltip.add(TextFormatting.GREEN + I18n.translateToLocal(Tags.MOD_ID + ".tooltip.ae_bound"));
+            }
+            if (options.cores.get() instanceof CoreDefault && HandlerContainer.hasBinding(options)) {
+                tooltip.add(TextFormatting.GREEN + I18n.translateToLocal(Tags.MOD_ID + ".tooltip.container_bound"));
             }
         } else {
             tooltip.add(TextFormatting.GRAY + String.format(I18n.translateToLocal(Tags.MOD_ID + ".tooltip.blocks"), limit));
