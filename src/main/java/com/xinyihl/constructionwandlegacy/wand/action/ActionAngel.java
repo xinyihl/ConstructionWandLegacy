@@ -5,7 +5,6 @@ import com.xinyihl.constructionwandlegacy.api.IWandSupplier;
 import com.xinyihl.constructionwandlegacy.basics.config.ConfigServer;
 import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
 import com.xinyihl.constructionwandlegacy.wand.undo.ISnapshot;
-import com.xinyihl.constructionwandlegacy.wand.undo.PlaceSnapshot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
@@ -36,7 +35,7 @@ public class ActionAngel implements IWandAction {
         for (int i = 0; i < limit; i++) {
             currentPos = currentPos.offset(placeDirection.getOpposite());
 
-            PlaceSnapshot snapshot = supplier.getPlaceSnapshot(world, currentPos, rayTraceResult,
+            ISnapshot snapshot = supplier.getPlaceSnapshot(world, currentPos, rayTraceResult,
                     world.getBlockState(rayTraceResult.getBlockPos()));
             if (snapshot != null) {
                 placeSnapshots.add(snapshot);
@@ -54,7 +53,7 @@ public class ActionAngel implements IWandAction {
         Vec3d placeVec = player.getPositionVector().add(player.getLookVec().scale(2));
         BlockPos currentPos = new BlockPos(placeVec);
 
-        PlaceSnapshot snapshot = supplier.getPlaceSnapshot(world, currentPos, rayTraceResult, null);
+        ISnapshot snapshot = supplier.getPlaceSnapshot(world, currentPos, rayTraceResult, null);
         if (snapshot != null) {
             placeSnapshots.add(snapshot);
         }

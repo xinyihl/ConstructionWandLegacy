@@ -5,7 +5,6 @@ import com.xinyihl.constructionwandlegacy.api.IWandSupplier;
 import com.xinyihl.constructionwandlegacy.basics.config.ConfigServer;
 import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
 import com.xinyihl.constructionwandlegacy.wand.undo.ISnapshot;
-import com.xinyihl.constructionwandlegacy.wand.undo.PlaceSnapshot;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -75,7 +74,7 @@ public class ActionConstruction implements IWandAction {
 
                 if (options.matchBlocks(targetBlock, candidateSupportingBlock)
                         && allCandidates.add(currentCandidate)) {
-                    PlaceSnapshot snapshot = supplier.getPlaceSnapshot(world, currentCandidate, rayTraceResult,
+                    ISnapshot snapshot = supplier.getPlaceSnapshot(world, currentCandidate, rayTraceResult,
                             candidateSupportingBlock);
                     if (snapshot == null) {
                         continue;

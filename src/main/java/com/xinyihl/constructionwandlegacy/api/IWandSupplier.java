@@ -1,6 +1,6 @@
 package com.xinyihl.constructionwandlegacy.api;
 
-import com.xinyihl.constructionwandlegacy.wand.undo.PlaceSnapshot;
+import com.xinyihl.constructionwandlegacy.wand.undo.ISnapshot;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -13,8 +13,8 @@ public interface IWandSupplier {
     void getSupply(@Nullable ItemStack target);
 
     @Nullable
-    PlaceSnapshot getPlaceSnapshot(World world, BlockPos pos, RayTraceResult rayTraceResult,
-                                   @Nullable IBlockState supportingBlock);
+    ISnapshot getPlaceSnapshot(World world, BlockPos pos, RayTraceResult rayTraceResult,
+                               @Nullable IBlockState supportingBlock);
 
     int takeItemStack(ItemStack stack);
 

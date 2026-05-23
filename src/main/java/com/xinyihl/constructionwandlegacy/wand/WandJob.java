@@ -6,8 +6,10 @@ import com.xinyihl.constructionwandlegacy.api.IWandSupplier;
 import com.xinyihl.constructionwandlegacy.basics.config.ConfigServer;
 import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
 import com.xinyihl.constructionwandlegacy.items.ModItems;
+import com.xinyihl.constructionwandlegacy.items.core.CoreDefault;
 import com.xinyihl.constructionwandlegacy.items.wand.ItemWand;
 import com.xinyihl.constructionwandlegacy.wand.supplier.SupplierInventory;
+import com.xinyihl.constructionwandlegacy.wand.supplier.SupplierPlantingOffhand;
 import com.xinyihl.constructionwandlegacy.wand.supplier.SupplierRandom;
 import com.xinyihl.constructionwandlegacy.wand.undo.ISnapshot;
 import net.minecraft.block.Block;
@@ -16,9 +18,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.common.IPlantable;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -49,8 +53,11 @@ public class WandJob {
         this.options = new WandOptions(wand);
         this.snapshots = new ArrayList<>();
 
+        ItemStack offhandStack = player.getHeldItemOffhand();
         IWandSupplier coreSupplier = options.cores.get().createSupplier(player, options);
-        if (coreSupplier != null) {
+        if (isPlantingMode(world, player, rayTraceResult, options, offhandStack)) {
+            this.wandSupplier = new SupplierPlantingOffhand(player, offhandStack);
+        } else if (coreSupplier != null) {
             this.wandSupplier = coreSupplier;
         } else {
             this.wandSupplier = options.random.get() ? new SupplierRandom(player, options) : new SupplierInventory(player, options);
@@ -58,6 +65,26 @@ public class WandJob {
         this.wandAction = options.cores.get().getWandAction();
 
         wandSupplier.getSupply(getTargetItem(world, rayTraceResult));
+    }
+
+    private static boolean isPlantingMode(World world, EntityPlayer player, RayTraceResult rayTraceResult,
+                                          WandOptions options, ItemStack offhandStack) {
+        if (!(options.cores.get() instanceof CoreDefault)
+                || rayTraceResult == null
+                || rayTraceResult.typeOfHit != RayTraceResult.Type.BLOCK
+                || rayTraceResult.sideHit != EnumFacing.UP
+                || !SupplierPlantingOffhand.isPlantable(offhandStack)) {
+            return false;
+        }
+
+        BlockPos farmlandPos = rayTraceResult.getBlockPos();
+        BlockPos cropPos = farmlandPos.up();
+        IPlantable plantable = (IPlantable) offhandStack.getItem();
+        IBlockState farmland = world.getBlockState(farmlandPos);
+        return world.isAirBlock(cropPos)
+                && world.isBlockModifiable(player, cropPos)
+                && player.canPlayerEdit(cropPos, EnumFacing.UP, offhandStack)
+                && farmland.getBlock().canSustainPlant(farmland, world, farmlandPos, EnumFacing.UP, plantable);
     }
 
     @Nullable
