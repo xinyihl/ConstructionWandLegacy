@@ -19,7 +19,7 @@ public class ItemWandBasic extends ItemWand {
 
     @Override
     public int remainingDurability(ItemStack stack) {
-        return stack.getMaxDamage() - stack.getItemDamage();
+        return Math.max(0, stack.getMaxDamage() - stack.getItemDamage() + 1);
     }
 
     @Override
