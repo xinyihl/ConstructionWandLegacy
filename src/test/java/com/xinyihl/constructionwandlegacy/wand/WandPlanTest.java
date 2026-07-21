@@ -1,33 +1,19 @@
 package com.xinyihl.constructionwandlegacy.wand;
 
-import com.xinyihl.constructionwandlegacy.material.MaterialCollector;
-import com.xinyihl.constructionwandlegacy.material.MaterialKey;
-import com.xinyihl.constructionwandlegacy.material.MaterialReservation;
-import com.xinyihl.constructionwandlegacy.material.MaterialSession;
-import com.xinyihl.constructionwandlegacy.material.MaterialSource;
+import com.xinyihl.constructionwandlegacy.material.*;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Bootstrap;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class WandPlanTest {
     @BeforeClass
@@ -45,20 +31,19 @@ public class WandPlanTest {
 
         assertEquals(1, plan.size());
         assertEquals(Collections.singleton(BlockPos.ORIGIN), plan.getBlockPositions());
-        assertThrows(UnsupportedOperationException.class,
-                () -> plan.getBlockPositions().add(BlockPos.ORIGIN.up()));
+        assertThrows(UnsupportedOperationException.class, () -> plan.getBlockPositions().add(BlockPos.ORIGIN.up()));
         assertEquals(1, plan.getPreviews().size());
         plan.discard();
         plan.discard();
-        assertFalse(plan.claimExecution() != null);
+        assertNull(plan.claimExecution());
     }
 
     @Test
     public void executionCanOnlyBeClaimedOnce() {
         WandPlan plan = new WandPlan(Collections.singletonList(new FakeOperation(BlockPos.ORIGIN)));
 
-        assertTrue(plan.claimExecution() != null);
-        assertFalse(plan.claimExecution() != null);
+        assertNotNull(plan.claimExecution());
+        assertNull(plan.claimExecution());
     }
 
     @Test(expected = NoSuchMethodException.class)
@@ -81,7 +66,7 @@ public class WandPlanTest {
         plan.discard();
         plan.discard();
         assertEquals(1, session.available(key));
-        assertFalse(plan.claimExecution() != null);
+        assertNull(plan.claimExecution());
     }
 
     private static final class FakeOperation implements WandOperation {

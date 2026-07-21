@@ -18,6 +18,17 @@ public final class MaterialSourceRegistry {
         inventoryFactories.add(new PortableContainerSourceFactory());
     }
 
+    private static List<MaterialSource> createSources(EntityPlayer player, ItemStack wand, List<MaterialSourceFactory> factories) {
+        List<MaterialSource> sources = new ArrayList<>();
+        for (MaterialSourceFactory factory : factories) {
+            MaterialSource source = factory.create(player, wand);
+            if (source != null) {
+                sources.add(source);
+            }
+        }
+        return sources;
+    }
+
     public void registerInventorySource(MaterialSourceFactory factory) {
         inventoryFactories.add(factory);
     }
@@ -32,17 +43,5 @@ public final class MaterialSourceRegistry {
         factories.add(factory);
         List<MaterialSource> sources = createSources(player, wand, factories);
         return player.isCreative() ? MaterialSession.creativeCatalog(sources) : new MaterialSession(sources);
-    }
-
-    private static List<MaterialSource> createSources(EntityPlayer player, ItemStack wand,
-                                                      List<MaterialSourceFactory> factories) {
-        List<MaterialSource> sources = new ArrayList<>();
-        for (MaterialSourceFactory factory : factories) {
-            MaterialSource source = factory.create(player, wand);
-            if (source != null) {
-                sources.add(source);
-            }
-        }
-        return sources;
     }
 }

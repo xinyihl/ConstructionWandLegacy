@@ -34,8 +34,7 @@ public final class ActionAngel implements WandAction {
         EnumFacing direction = hit.sideHit.getOpposite();
         for (int distance = 0; distance < limit; distance++) {
             current = current.offset(direction);
-            WandOperation operation = resolver.createPlacement(
-                    current, context.getWorld().getBlockState(hit.getBlockPos()));
+            WandOperation operation = resolver.createPlacement(current, context.getWorld().getBlockState(hit.getBlockPos()));
             if (operation != null) {
                 return Collections.singletonList(operation);
             }
@@ -45,8 +44,7 @@ public final class ActionAngel implements WandAction {
 
     @Override
     public List<WandOperation> planFromAir(WandContext context, OperationResolver resolver, int limit) {
-        Vec3d placeVector = context.getPlayer().getPositionVector()
-                .add(context.getPlayer().getLookVec().scale(2));
+        Vec3d placeVector = context.getPlayer().getPositionVector().add(context.getPlayer().getLookVec().scale(2));
         WandOperation operation = resolver.createPlacement(new BlockPos(placeVector), null);
         return operation == null ? Collections.emptyList() : Collections.singletonList(operation);
     }

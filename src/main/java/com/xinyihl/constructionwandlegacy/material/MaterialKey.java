@@ -56,11 +56,7 @@ public final class MaterialKey {
     }
 
     public boolean matches(ItemStack stack) {
-        return stack != null
-                && !stack.isEmpty()
-                && stack.getItem() == item
-                && stack.getMetadata() == metadata
-                && Objects.equals(tag, stack.getTagCompound());
+        return stack != null && !stack.isEmpty() && stack.getItem() == item && stack.getMetadata() == metadata && Objects.equals(tag, stack.getTagCompound());
     }
 
     @Override
@@ -72,9 +68,7 @@ public final class MaterialKey {
             return false;
         }
         MaterialKey that = (MaterialKey) other;
-        return item == that.item
-                && metadata == that.metadata
-                && Objects.equals(tag, that.tag);
+        return item == that.item && metadata == that.metadata && Objects.equals(tag, that.tag);
     }
 
     @Override

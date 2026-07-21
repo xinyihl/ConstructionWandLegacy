@@ -35,6 +35,38 @@ public final class PlantOperation implements WandOperation {
         return plantState == null ? null : new PlantOperation(cropPos, seedStack, plantState);
     }
 
+    private static WandOperation.RollbackResult restoreBefore(World world, BlockPos pos, BlockSnapshot snapshot, RestorationState detached, boolean alreadyReverted) {
+        if (alreadyReverted) {
+            WandOperation.RollbackResult detachedResult = detached.restore(world, pos);
+            if (detachedResult.isRestored()) {
+                return detachedResult;
+            }
+        }
+        try {
+            if (snapshot.restore(true, true)) {
+                return WandOperation.RollbackResult.restored();
+            }
+        } catch (RuntimeException exception) {
+            WandOperation.RollbackResult fallback = detached.restore(world, pos);
+            return fallback.isRestored() ? fallback : WandOperation.RollbackResult.failed("snapshot restoration threw", exception);
+        }
+        return detached.restore(world, pos);
+    }
+
+    @Nullable
+    private static IBlockState validate(World world, EntityPlayer player, BlockPos cropPos, ItemStack seedStack) {
+        if (seedStack.isEmpty() || !(seedStack.getItem() instanceof IPlantable) || !world.isAirBlock(cropPos) || !world.isBlockModifiable(player, cropPos) || !player.canPlayerEdit(cropPos, EnumFacing.UP, seedStack)) {
+            return null;
+        }
+        IPlantable plantable = (IPlantable) seedStack.getItem();
+        BlockPos farmlandPos = cropPos.down();
+        IBlockState farmland = world.getBlockState(farmlandPos);
+        if (!farmland.getBlock().canSustainPlant(farmland, world, farmlandPos, EnumFacing.UP, plantable)) {
+            return null;
+        }
+        return plantable.getPlant(world, cropPos);
+    }
+
     @Override
     public BlockPos getPos() {
         return pos;
@@ -61,80 +93,33 @@ public final class PlantOperation implements WandOperation {
 
             BlockSnapshot snapshot = BlockSnapshot.getBlockSnapshot(world, pos);
             if (!world.setBlockState(pos, plantState, 3)) {
-                WandOperation.RollbackResult rollback = restoreBefore(
-                        world, pos, beforeSnapshot, before, false);
+                WandOperation.RollbackResult rollback = restoreBefore(world, pos, beforeSnapshot, before, false);
                 if (rollback.isRestored()) {
                     return ApplyResult.rejected("world rejected crop placement");
                 }
-                return ApplyResult.failedWithChange("crop placement rejection left a world mutation", null,
-                        new PlantChange(pos, before, world.getBlockState(pos)), rollback);
+                return ApplyResult.failedWithChange("crop placement rejection left a world mutation", null, new PlantChange(pos, before, world.getBlockState(pos)), rollback);
             }
             IBlockState farmland = world.getBlockState(pos.down());
             BlockEvent.EntityPlaceEvent event = new BlockEvent.EntityPlaceEvent(snapshot, farmland, context.getPlayer());
             MinecraftForge.EVENT_BUS.post(event);
             if (event.isCanceled()) {
                 boolean reverted = world.setBlockState(pos, snapshot.getReplacedBlock(), 3);
-                WandOperation.RollbackResult rollback = restoreBefore(
-                        world, pos, beforeSnapshot, before, reverted);
+                WandOperation.RollbackResult rollback = restoreBefore(world, pos, beforeSnapshot, before, reverted);
                 if (rollback.isRestored()) {
                     return ApplyResult.rejected("crop placement event was canceled");
                 }
-                return ApplyResult.failedWithChange("crop event cancellation could not restore state", null,
-                        new PlantChange(pos, before, world.getBlockState(pos)), rollback);
+                return ApplyResult.failedWithChange("crop event cancellation could not restore state", null, new PlantChange(pos, before, world.getBlockState(pos)), rollback);
             }
 
             IBlockState after = world.getBlockState(pos);
             return ApplyResult.applied(new PlantChange(pos, before, after));
         } catch (RuntimeException exception) {
-            WandOperation.RollbackResult rollback = restoreBefore(
-                    world, pos, beforeSnapshot, before, false);
+            WandOperation.RollbackResult rollback = restoreBefore(world, pos, beforeSnapshot, before, false);
             if (rollback.isRestored()) {
                 return ApplyResult.failed("exception while planting crop", exception);
             }
-            return ApplyResult.failedWithChange("exception while planting crop", exception,
-                    new PlantChange(pos, before, world.getBlockState(pos)), rollback);
+            return ApplyResult.failedWithChange("exception while planting crop", exception, new PlantChange(pos, before, world.getBlockState(pos)), rollback);
         }
-    }
-
-    private static WandOperation.RollbackResult restoreBefore(World world, BlockPos pos,
-                                                               BlockSnapshot snapshot,
-                                                               RestorationState detached,
-                                                               boolean alreadyReverted) {
-        if (alreadyReverted) {
-            WandOperation.RollbackResult detachedResult = detached.restore(world, pos);
-            if (detachedResult.isRestored()) {
-                return detachedResult;
-            }
-        }
-        try {
-            if (snapshot.restore(true, true)) {
-                return WandOperation.RollbackResult.restored();
-            }
-        } catch (RuntimeException exception) {
-            WandOperation.RollbackResult fallback = detached.restore(world, pos);
-            return fallback.isRestored()
-                    ? fallback
-                    : WandOperation.RollbackResult.failed("snapshot restoration threw", exception);
-        }
-        return detached.restore(world, pos);
-    }
-
-    @Nullable
-    private static IBlockState validate(World world, EntityPlayer player, BlockPos cropPos, ItemStack seedStack) {
-        if (seedStack.isEmpty() || !(seedStack.getItem() instanceof IPlantable)
-                || !world.isAirBlock(cropPos)
-                || !world.isBlockModifiable(player, cropPos)
-                || !player.canPlayerEdit(cropPos, EnumFacing.UP, seedStack)) {
-            return null;
-        }
-        IPlantable plantable = (IPlantable) seedStack.getItem();
-        BlockPos farmlandPos = cropPos.down();
-        IBlockState farmland = world.getBlockState(farmlandPos);
-        if (!farmland.getBlock().canSustainPlant(
-                farmland, world, farmlandPos, EnumFacing.UP, plantable)) {
-            return null;
-        }
-        return plantable.getPlant(world, cropPos);
     }
 
     private static final class PlantChange implements AppliedChange {

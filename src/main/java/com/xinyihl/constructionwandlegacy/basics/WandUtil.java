@@ -64,8 +64,7 @@ public final class WandUtil {
         return world.setBlockState(pos, state, 3);
     }
 
-    public static boolean placeBlockAt(World world, EntityPlayer player, BlockPos pos, ItemStack placeStack,
-                                       IBlockState state, @Nullable RayTraceResult rayTraceResult) {
+    public static boolean placeBlockAt(World world, EntityPlayer player, BlockPos pos, ItemStack placeStack, IBlockState state, @Nullable RayTraceResult rayTraceResult) {
         if (placeStack.isEmpty() || !(placeStack.getItem() instanceof ItemBlock)) {
             return false;
         }

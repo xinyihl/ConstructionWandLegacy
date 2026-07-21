@@ -52,14 +52,11 @@ public final class DestroyOperation implements WandOperation {
                 if (world.getBlockState(pos).equals(block)) {
                     return ApplyResult.rejected("break event or world mutation rejected the operation");
                 }
-                RollbackResult rollback = world.setBlockState(pos, block, 3)
-                        ? RollbackResult.restored()
-                        : RollbackResult.notRestored("world rejected destruction rollback");
+                RollbackResult rollback = world.setBlockState(pos, block, 3) ? RollbackResult.restored() : RollbackResult.notRestored("world rejected destruction rollback");
                 if (rollback.isRestored()) {
                     return ApplyResult.rejected("break event or world mutation rejected the operation");
                 }
-                return ApplyResult.failedWithChange("break rejection left a world mutation", null,
-                        new DestroyChange(pos, block), rollback);
+                return ApplyResult.failedWithChange("break rejection left a world mutation", null, new DestroyChange(pos, block), rollback);
             }
             return ApplyResult.applied(new DestroyChange(pos, block));
         } catch (RuntimeException exception) {
@@ -67,9 +64,7 @@ public final class DestroyOperation implements WandOperation {
             if (restored) {
                 return ApplyResult.failed("exception while destroying block", exception);
             }
-            return ApplyResult.failedWithChange("exception while destroying block", exception,
-                    new DestroyChange(pos, block),
-                    RollbackResult.notRestored("world rejected destruction rollback"));
+            return ApplyResult.failedWithChange("exception while destroying block", exception, new DestroyChange(pos, block), RollbackResult.notRestored("world rejected destruction rollback"));
         }
     }
 
@@ -95,9 +90,7 @@ public final class DestroyOperation implements WandOperation {
             if (!world.isAirBlock(pos)) {
                 return RollbackResult.notRestored("destroyed position is occupied");
             }
-            return world.setBlockState(pos, block, 3)
-                    ? RollbackResult.restored()
-                    : RollbackResult.notRestored("world rejected destruction rollback");
+            return world.setBlockState(pos, block, 3) ? RollbackResult.restored() : RollbackResult.notRestored("world rejected destruction rollback");
         }
 
         @Override
@@ -108,9 +101,7 @@ public final class DestroyOperation implements WandOperation {
             if (!world.isAirBlock(pos)) {
                 return RollbackResult.notRestored("destroyed position is occupied");
             }
-            return WandUtil.placeBlock(world, player, block, pos)
-                    ? RollbackResult.restored()
-                    : RollbackResult.notRestored("world rejected destruction restore");
+            return WandUtil.placeBlock(world, player, block, pos) ? RollbackResult.restored() : RollbackResult.notRestored("world rejected destruction restore");
         }
     }
 }

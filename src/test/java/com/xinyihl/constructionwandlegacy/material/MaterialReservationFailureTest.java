@@ -9,15 +9,10 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class MaterialReservationFailureTest {
-    private final MaterialKey key = MaterialKey.of(new ItemStack(
-            new Item().setRegistryName(new ResourceLocation("test", "reservation_failure")), 1));
+    private final MaterialKey key = MaterialKey.of(new ItemStack(new Item().setRegistryName(new ResourceLocation("test", "reservation_failure")), 1));
 
     @BeforeClass
     public static void bootstrapVanillaRegistries() {
@@ -55,8 +50,7 @@ public class MaterialReservationFailureTest {
         private int actual;
         private boolean refundFailed;
 
-        private RecordingSource(String id, MaterialKey key, int count,
-                                boolean failFirstRefund, boolean throwOnExtract) {
+        private RecordingSource(String id, MaterialKey key, int count, boolean failFirstRefund, boolean throwOnExtract) {
             this.id = id;
             this.key = key;
             this.enumerated = count;

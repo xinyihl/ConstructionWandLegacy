@@ -5,14 +5,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-/** Read-only preview data plus a package-private, one-shot execution lease. */
+/**
+ * Read-only preview data plus a package-private, one-shot execution lease.
+ */
 public final class WandPlan {
     private final List<Entry> entries;
     private final Set<BlockPos> positions;
@@ -24,8 +21,7 @@ public final class WandPlan {
         this(operations, Collections.emptyMap());
     }
 
-    WandPlan(List<? extends WandOperation> operations,
-             Map<? extends WandOperation, MaterialReservation> reservations) {
+    WandPlan(List<? extends WandOperation> operations, Map<? extends WandOperation, MaterialReservation> reservations) {
         List<Entry> mutableEntries = new ArrayList<>();
         LinkedHashSet<BlockPos> plannedPositions = new LinkedHashSet<>();
         List<Preview> plannedPreviews = new ArrayList<>();
@@ -57,7 +53,9 @@ public final class WandPlan {
         return entries.isEmpty();
     }
 
-    /** Releases all planning reservations when this plan is only a preview. Idempotent. */
+    /**
+     * Releases all planning reservations when this plan is only a preview. Idempotent.
+     */
     public synchronized void discard() {
         if (claimed || discarded) {
             return;
@@ -126,7 +124,9 @@ public final class WandPlan {
         }
     }
 
-    /** Unforgeable lease issued only through the package-private executor path. */
+    /**
+     * Unforgeable lease issued only through the package-private executor path.
+     */
     public static final class ExecutionToken {
         private boolean active = true;
 

@@ -4,15 +4,12 @@ import com.xinyihl.constructionwandlegacy.basics.option.WandState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
-/** Shared breadth-first traversal for construction and destruction planes. */
+/**
+ * Shared breadth-first traversal for construction and destruction planes.
+ */
 public final class PlaneTraversal {
     private PlaneTraversal() {
     }
@@ -21,8 +18,7 @@ public final class PlaneTraversal {
      * Evaluates positions in the legacy breadth-first order. A {@code null} value rejects a position
      * and prevents traversal from expanding through it.
      */
-    public static <T> List<T> traverse(BlockPos origin, EnumFacing face, WandState.Lock lock, int limit,
-                                       Function<BlockPos, T> evaluator) {
+    public static <T> List<T> traverse(BlockPos origin, EnumFacing face, WandState.Lock lock, int limit, Function<BlockPos, T> evaluator) {
         Objects.requireNonNull(origin, "origin");
         Objects.requireNonNull(face, "face");
         Objects.requireNonNull(lock, "lock");
@@ -61,22 +57,13 @@ public final class PlaneTraversal {
         switch (face) {
             case DOWN:
             case UP:
-                return new Axes(EnumFacing.NORTH, EnumFacing.SOUTH,
-                        EnumFacing.EAST, EnumFacing.WEST,
-                        permits(lock, WandState.Lock.NORTHSOUTH),
-                        permits(lock, WandState.Lock.EASTWEST));
+                return new Axes(EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST, permits(lock, WandState.Lock.NORTHSOUTH), permits(lock, WandState.Lock.EASTWEST));
             case NORTH:
             case SOUTH:
-                return new Axes(EnumFacing.EAST, EnumFacing.WEST,
-                        EnumFacing.UP, EnumFacing.DOWN,
-                        permits(lock, WandState.Lock.HORIZONTAL),
-                        permits(lock, WandState.Lock.VERTICAL));
+                return new Axes(EnumFacing.EAST, EnumFacing.WEST, EnumFacing.UP, EnumFacing.DOWN, permits(lock, WandState.Lock.HORIZONTAL), permits(lock, WandState.Lock.VERTICAL));
             case EAST:
             case WEST:
-                return new Axes(EnumFacing.NORTH, EnumFacing.SOUTH,
-                        EnumFacing.UP, EnumFacing.DOWN,
-                        permits(lock, WandState.Lock.HORIZONTAL),
-                        permits(lock, WandState.Lock.VERTICAL));
+                return new Axes(EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.UP, EnumFacing.DOWN, permits(lock, WandState.Lock.HORIZONTAL), permits(lock, WandState.Lock.VERTICAL));
             default:
                 throw new IllegalArgumentException("Unsupported face: " + face);
         }
@@ -86,8 +73,7 @@ public final class PlaneTraversal {
         return actual == WandState.Lock.NOLOCK || actual == requested;
     }
 
-    private static void addPlaneCandidates(ArrayDeque<BlockPos> candidates, Set<BlockPos> visited,
-                                           BlockPos origin, Axes axes) {
+    private static void addPlaneCandidates(ArrayDeque<BlockPos> candidates, Set<BlockPos> visited, BlockPos origin, Axes axes) {
         if (axes.useFirst) {
             enqueue(candidates, visited, origin.offset(axes.firstA));
             enqueue(candidates, visited, origin.offset(axes.firstB));
@@ -118,8 +104,7 @@ public final class PlaneTraversal {
         private final boolean useFirst;
         private final boolean useSecond;
 
-        private Axes(EnumFacing firstA, EnumFacing firstB, EnumFacing secondA, EnumFacing secondB,
-                     boolean useFirst, boolean useSecond) {
+        private Axes(EnumFacing firstA, EnumFacing firstB, EnumFacing secondA, EnumFacing secondB, boolean useFirst, boolean useSecond) {
             this.firstA = firstA;
             this.firstB = firstB;
             this.secondA = secondA;

@@ -1,12 +1,7 @@
 package com.xinyihl.constructionwandlegacy.material;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Records exact extraction endpoints. Combined and component receipts share entry state, so an
@@ -35,8 +30,7 @@ public final class MaterialReceipt {
         if (count <= 0) {
             return empty();
         }
-        return new MaterialReceipt(Collections.singletonList(
-                new Entry(sourceId, key, count, refundTarget)));
+        return new MaterialReceipt(Collections.singletonList(new Entry(sourceId, key, count, refundTarget)));
     }
 
     public static MaterialReceipt combine(List<MaterialReceipt> receipts) {
@@ -93,7 +87,9 @@ public final class MaterialReceipt {
         return true;
     }
 
-    /** Returns the amount that could not yet be delivered by any refund target. */
+    /**
+     * Returns the amount that could not yet be delivered by any refund target.
+     */
     public int getRemainingCount() {
         int remaining = 0;
         for (Entry entry : entries) {
@@ -161,8 +157,7 @@ public final class MaterialReceipt {
             try {
                 int next = refundTarget.refund(key, requested);
                 if (next < 0 || next > requested) {
-                    throw new IllegalStateException("Refund target returned invalid remainder " + next
-                            + " for request " + requested);
+                    throw new IllegalStateException("Refund target returned invalid remainder " + next + " for request " + requested);
                 }
                 remaining = next;
                 lastFailure = null;

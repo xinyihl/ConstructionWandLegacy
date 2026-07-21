@@ -19,8 +19,7 @@ public class CommonEvents {
     @SubscribeEvent
     public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         if (ConstructionWandLegacy.instance != null && event.player != null) {
-            ConstructionWandLegacy.instance.getRuntime().getUndoService()
-                    .clearHistory(event.player.getUniqueID());
+            ConstructionWandLegacy.instance.getRuntime().getUndoService().clearHistory(event.player.getUniqueID());
         }
     }
 

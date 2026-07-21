@@ -1,8 +1,8 @@
 package com.xinyihl.constructionwandlegacy.testfixture;
 
+import net.minecraft.init.Bootstrap;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.init.Bootstrap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import org.junit.BeforeClass;
@@ -23,11 +23,7 @@ public class MaterialAggregationFixtureTest {
 
     @Test
     public void duplicateStacksAreCountedOncePerInventorySlot() {
-        List<MaterialAggregationFixture.Aggregate> result = MaterialAggregationFixture.aggregate(Arrays.asList(
-                stack(32, 0, null),
-                stack(16, 0, null),
-                stack(7, 1, null)
-        ));
+        List<MaterialAggregationFixture.Aggregate> result = MaterialAggregationFixture.aggregate(Arrays.asList(stack(32, 0, null), stack(16, 0, null), stack(7, 1, null)));
 
         assertEquals(2, result.size());
         assertEquals(48, result.get(0).getCount());
@@ -43,11 +39,7 @@ public class MaterialAggregationFixtureTest {
         NBTTagCompound blue = new NBTTagCompound();
         blue.setString("variant", "blue");
 
-        List<MaterialAggregationFixture.Aggregate> result = MaterialAggregationFixture.aggregate(Arrays.asList(
-                stack(10, 0, red),
-                stack(4, 0, blue),
-                stack(6, 0, red.copy())
-        ));
+        List<MaterialAggregationFixture.Aggregate> result = MaterialAggregationFixture.aggregate(Arrays.asList(stack(10, 0, red), stack(4, 0, blue), stack(6, 0, red.copy())));
 
         assertEquals(2, result.size());
         assertEquals(16, result.get(0).getCount());
@@ -58,10 +50,7 @@ public class MaterialAggregationFixtureTest {
 
     @Test
     public void aggregateCountSaturatesInsteadOfOverflowing() {
-        List<MaterialAggregationFixture.Aggregate> result = MaterialAggregationFixture.aggregate(Arrays.asList(
-                stack(Integer.MAX_VALUE - 4, 0, null),
-                stack(10, 0, null)
-        ));
+        List<MaterialAggregationFixture.Aggregate> result = MaterialAggregationFixture.aggregate(Arrays.asList(stack(Integer.MAX_VALUE - 4, 0, null), stack(10, 0, null)));
 
         assertEquals(1, result.size());
         assertEquals(Integer.MAX_VALUE, result.get(0).getCount());

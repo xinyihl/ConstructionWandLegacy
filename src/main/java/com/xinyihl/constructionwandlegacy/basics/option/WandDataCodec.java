@@ -37,8 +37,7 @@ public final class WandDataCodec {
         int selectedCore = data == null ? 0 : data.getByte(TAG_CORE_SELECTOR);
 
         WandState.Lock lock = readEnum(data, WandOption.LOCK, WandState.Lock.class, WandState.Lock.NOLOCK);
-        WandState.Direction direction = readEnum(data, WandOption.DIRECTION, WandState.Direction.class,
-                WandState.Direction.TARGET);
+        WandState.Direction direction = readEnum(data, WandOption.DIRECTION, WandState.Direction.class, WandState.Direction.TARGET);
         boolean replace = readBoolean(data, WandOption.REPLACE, true);
         WandState.Match match = readEnum(data, WandOption.MATCH, WandState.Match.class, WandState.Match.SIMILAR);
         boolean random = readBoolean(data, WandOption.RANDOM, false);
@@ -68,8 +67,7 @@ public final class WandDataCodec {
             case REPLACE:
             case RANDOM:
                 Boolean booleanValue = parseBoolean(value);
-                return booleanValue != null && update(wandStack,
-                        data -> data.setBoolean(option.getId(), booleanValue));
+                return booleanValue != null && update(wandStack, data -> data.setBoolean(option.getId(), booleanValue));
             case MATCH:
                 WandState.Match match = parseEnum(WandState.Match.class, value);
                 return match != null && writeString(wandStack, option, enumValue(match));
@@ -242,8 +240,7 @@ public final class WandDataCodec {
                 ConstructionWandLegacy.LOGGER.warn("Invalid wand upgrade id: {}", rawId);
                 continue;
             }
-            if (!VALID_NAMESPACE.matcher(id.getNamespace()).matches()
-                    || !VALID_PATH.matcher(id.getPath()).matches()) {
+            if (!VALID_NAMESPACE.matcher(id.getNamespace()).matches() || !VALID_PATH.matcher(id.getPath()).matches()) {
                 ConstructionWandLegacy.LOGGER.warn("Invalid wand upgrade id: {}", rawId);
                 continue;
             }
@@ -274,8 +271,7 @@ public final class WandDataCodec {
         return data != null && data.hasKey(option.getId()) ? data.getBoolean(option.getId()) : defaultValue;
     }
 
-    private static <E extends Enum<E>> E readEnum(@Nullable NBTTagCompound data, WandOption option,
-                                                   Class<E> enumClass, E defaultValue) {
+    private static <E extends Enum<E>> E readEnum(@Nullable NBTTagCompound data, WandOption option, Class<E> enumClass, E defaultValue) {
         if (data == null) {
             return defaultValue;
         }

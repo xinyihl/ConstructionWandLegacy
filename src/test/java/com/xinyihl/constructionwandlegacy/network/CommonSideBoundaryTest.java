@@ -12,6 +12,46 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertFalse;
 
 public class CommonSideBoundaryTest {
+    private static void assertNoClientImports(Path path) throws IOException {
+        if (Files.isDirectory(path)) {
+            try (Stream<Path> files = Files.walk(path)) {
+                files.filter(file -> file.toString().endsWith(".java")).forEach(CommonSideBoundaryTest::assertSourceIsCommonSafe);
+            }
+        } else {
+            assertSourceIsCommonSafe(path);
+        }
+    }
+
+    private static void assertSourceIsCommonSafe(Path path) {
+        try {
+            String source = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+            assertFalse(path + " imports net.minecraft.client", source.contains("import net.minecraft.client"));
+            assertFalse(path + " imports the mod client package", source.contains("import com.xinyihl.constructionwandlegacy.client"));
+        } catch (IOException exception) {
+            throw new AssertionError(exception);
+        }
+    }
+
+    private static void assertNoClientClassLinks(Path path) throws IOException {
+        if (Files.isDirectory(path)) {
+            try (Stream<Path> files = Files.walk(path)) {
+                files.filter(file -> file.toString().endsWith(".class")).forEach(CommonSideBoundaryTest::assertClassIsCommonSafe);
+            }
+        } else {
+            assertClassIsCommonSafe(path);
+        }
+    }
+
+    private static void assertClassIsCommonSafe(Path path) {
+        try {
+            String constants = new String(Files.readAllBytes(path), StandardCharsets.ISO_8859_1);
+            assertFalse(path + " links net/minecraft/client", constants.contains("net/minecraft/client"));
+            assertFalse(path + " links the mod client package", constants.contains("com/xinyihl/constructionwandlegacy/client/"));
+        } catch (IOException exception) {
+            throw new AssertionError(exception);
+        }
+    }
+
     @Test
     public void commonBootstrapNetworkAndConfigDoNotImportClientClasses() throws IOException {
         assertNoClientImports(Paths.get("src/main/java/com/xinyihl/constructionwandlegacy/network"));
@@ -27,51 +67,5 @@ public class CommonSideBoundaryTest {
         assertNoClientClassLinks(classes.resolve("config"));
         assertNoClientClassLinks(classes.resolve("proxy/CommonProxy.class"));
         assertNoClientClassLinks(classes.resolve("ConstructionWandLegacy.class"));
-    }
-
-    private static void assertNoClientImports(Path path) throws IOException {
-        if (Files.isDirectory(path)) {
-            try (Stream<Path> files = Files.walk(path)) {
-                files.filter(file -> file.toString().endsWith(".java"))
-                        .forEach(CommonSideBoundaryTest::assertSourceIsCommonSafe);
-            }
-        } else {
-            assertSourceIsCommonSafe(path);
-        }
-    }
-
-    private static void assertSourceIsCommonSafe(Path path) {
-        try {
-            String source = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-            assertFalse(path + " imports net.minecraft.client",
-                    source.contains("import net.minecraft.client"));
-            assertFalse(path + " imports the mod client package",
-                    source.contains("import com.xinyihl.constructionwandlegacy.client"));
-        } catch (IOException exception) {
-            throw new AssertionError(exception);
-        }
-    }
-
-    private static void assertNoClientClassLinks(Path path) throws IOException {
-        if (Files.isDirectory(path)) {
-            try (Stream<Path> files = Files.walk(path)) {
-                files.filter(file -> file.toString().endsWith(".class"))
-                        .forEach(CommonSideBoundaryTest::assertClassIsCommonSafe);
-            }
-        } else {
-            assertClassIsCommonSafe(path);
-        }
-    }
-
-    private static void assertClassIsCommonSafe(Path path) {
-        try {
-            String constants = new String(Files.readAllBytes(path), StandardCharsets.ISO_8859_1);
-            assertFalse(path + " links net/minecraft/client",
-                    constants.contains("net/minecraft/client"));
-            assertFalse(path + " links the mod client package",
-                    constants.contains("com/xinyihl/constructionwandlegacy/client/"));
-        } catch (IOException exception) {
-            throw new AssertionError(exception);
-        }
     }
 }

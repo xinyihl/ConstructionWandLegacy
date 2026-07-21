@@ -24,6 +24,27 @@ public final class RenderBlockPreview {
         this.previewController = previewController;
     }
 
+    private static void renderBoxes(EntityPlayer player, Set<BlockPos> blocks, PreviewSnapshot.PreviewColor color, float partialTicks) {
+        double px = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
+        double py = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
+        double pz = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
+
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.glLineWidth(2.0F);
+        GlStateManager.disableTexture2D();
+        GlStateManager.depthMask(false);
+
+        for (BlockPos blockPos : blocks) {
+            AxisAlignedBB box = new AxisAlignedBB(blockPos).grow(0.002D).offset(-px, -py, -pz);
+            RenderGlobal.drawSelectionBoundingBox(box, color.getRed(), color.getGreen(), color.getBlue(), 0.4F);
+        }
+
+        GlStateManager.depthMask(true);
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+    }
+
     @SubscribeEvent(receiveCanceled = true)
     public void onDrawBlockHighlight(DrawBlockHighlightEvent event) {
         RayTraceResult target = event.getTarget();
@@ -37,13 +58,10 @@ public final class RenderBlockPreview {
         if (key == null || snapshot.isEmpty()) {
             return;
         }
-        if ((snapshot.getMode() == PreviewKey.Mode.BLOCK
-                || snapshot.getMode() == PreviewKey.Mode.UNDO)
-                && !key.matchesBlock(target.getBlockPos(), target.sideHit)) {
+        if ((snapshot.getMode() == PreviewKey.Mode.BLOCK || snapshot.getMode() == PreviewKey.Mode.UNDO) && !key.matchesBlock(target.getBlockPos(), target.sideHit)) {
             return;
         }
-        if (snapshot.getMode() != PreviewKey.Mode.BLOCK
-                && snapshot.getMode() != PreviewKey.Mode.UNDO) {
+        if (snapshot.getMode() != PreviewKey.Mode.BLOCK && snapshot.getMode() != PreviewKey.Mode.UNDO) {
             return;
         }
 
@@ -58,40 +76,13 @@ public final class RenderBlockPreview {
             return;
         }
         Minecraft minecraft = Minecraft.getMinecraft();
-        if (minecraft.objectMouseOver != null
-                && minecraft.objectMouseOver.typeOfHit != RayTraceResult.Type.MISS) {
+        if (minecraft.objectMouseOver != null && minecraft.objectMouseOver.typeOfHit != RayTraceResult.Type.MISS) {
             return;
         }
         EntityPlayer player = minecraft.player;
         if (player != null) {
             renderBoxes(player, snapshot.getBlocks(), snapshot.getColor(), event.getPartialTicks());
         }
-    }
-
-    private static void renderBoxes(EntityPlayer player, Set<BlockPos> blocks,
-                                    PreviewSnapshot.PreviewColor color, float partialTicks) {
-        double px = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
-        double py = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
-        double pz = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
-
-        GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-                GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                GlStateManager.SourceFactor.ONE,
-                GlStateManager.DestFactor.ZERO);
-        GlStateManager.glLineWidth(2.0F);
-        GlStateManager.disableTexture2D();
-        GlStateManager.depthMask(false);
-
-        for (BlockPos blockPos : blocks) {
-            AxisAlignedBB box = new AxisAlignedBB(blockPos).grow(0.002D).offset(-px, -py, -pz);
-            RenderGlobal.drawSelectionBoundingBox(box, color.getRed(), color.getGreen(),
-                    color.getBlue(), 0.4F);
-        }
-
-        GlStateManager.depthMask(true);
-        GlStateManager.enableTexture2D();
-        GlStateManager.disableBlend();
     }
 
     @SubscribeEvent

@@ -7,7 +7,9 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
-/** An immutable planned world mutation. */
+/**
+ * An immutable planned world mutation.
+ */
 public interface WandOperation {
     BlockPos getPos();
 
@@ -24,18 +26,11 @@ public interface WandOperation {
     }
 
     final class RollbackResult {
-        public enum Status {
-            RESTORED,
-            NOT_RESTORED,
-            FAILED
-        }
-
         private final Status status;
         @Nullable
         private final String message;
         @Nullable
         private final RuntimeException cause;
-
         private RollbackResult(Status status, @Nullable String message, @Nullable RuntimeException cause) {
             this.status = status;
             this.message = message;
@@ -71,15 +66,13 @@ public interface WandOperation {
         public RuntimeException getCause() {
             return cause;
         }
+
+        public enum Status {
+            RESTORED, NOT_RESTORED, FAILED
+        }
     }
 
     final class ApplyResult {
-        public enum Status {
-            APPLIED,
-            REJECTED,
-            FAILED
-        }
-
         private final Status status;
         @Nullable
         private final AppliedChange change;
@@ -89,10 +82,7 @@ public interface WandOperation {
         private final String message;
         @Nullable
         private final RuntimeException cause;
-
-        private ApplyResult(Status status, @Nullable AppliedChange change,
-                            @Nullable RollbackResult rollbackResult,
-                            @Nullable String message, @Nullable RuntimeException cause) {
+        private ApplyResult(Status status, @Nullable AppliedChange change, @Nullable RollbackResult rollbackResult, @Nullable String message, @Nullable RuntimeException cause) {
             this.status = status;
             this.change = change;
             this.rollbackResult = rollbackResult;
@@ -112,8 +102,7 @@ public interface WandOperation {
             return new ApplyResult(Status.FAILED, null, null, message, cause);
         }
 
-        public static ApplyResult failedWithChange(String message, @Nullable RuntimeException cause,
-                                                   AppliedChange change, RollbackResult rollbackResult) {
+        public static ApplyResult failedWithChange(String message, @Nullable RuntimeException cause, AppliedChange change, RollbackResult rollbackResult) {
             return new ApplyResult(Status.FAILED, change, rollbackResult, message, cause);
         }
 
@@ -139,6 +128,10 @@ public interface WandOperation {
         @Nullable
         public RuntimeException getCause() {
             return cause;
+        }
+
+        public enum Status {
+            APPLIED, REJECTED, FAILED
         }
     }
 }

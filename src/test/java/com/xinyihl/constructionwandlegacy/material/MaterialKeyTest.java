@@ -21,8 +21,7 @@ public class MaterialKeyTest {
 
     @Test
     public void countDoesNotParticipateInIdentity() {
-        assertEquals(MaterialKey.of(new ItemStack(item, 1, 3)),
-                MaterialKey.of(new ItemStack(item, 64, 3)));
+        assertEquals(MaterialKey.of(new ItemStack(item, 1, 3)), MaterialKey.of(new ItemStack(item, 64, 3)));
     }
 
     @Test

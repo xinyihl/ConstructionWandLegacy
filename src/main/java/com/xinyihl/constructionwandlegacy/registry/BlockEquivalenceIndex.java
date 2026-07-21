@@ -8,14 +8,7 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 public final class BlockEquivalenceIndex {
@@ -59,24 +52,6 @@ public final class BlockEquivalenceIndex {
         return new BlockEquivalenceIndex(Collections.unmodifiableMap(immutableIndex));
     }
 
-    public Set<Item> matchingItems(Item item) {
-        Set<Item> matches = matchingItems.get(item);
-        return matches == null ? Collections.emptySet() : matches;
-    }
-
-    public boolean matchBlocks(Block first, Block second) {
-        if (first == second) {
-            return true;
-        }
-        if (first == Blocks.AIR || second == Blocks.AIR) {
-            return false;
-        }
-
-        Item firstItem = Item.getItemFromBlock(first);
-        Item secondItem = Item.getItemFromBlock(second);
-        return matchingItems(firstItem).contains(secondItem);
-    }
-
     private static List<Item> parseGroup(@Nullable String rawGroup, Consumer<String> warningSink) {
         if (rawGroup == null || rawGroup.trim().isEmpty()) {
             warn(warningSink, rawGroup, null);
@@ -111,7 +86,24 @@ public final class BlockEquivalenceIndex {
 
     private static void warn(Consumer<String> warningSink, @Nullable String rawGroup, @Nullable String rawId) {
         String detail = rawId == null ? "" : ", invalid id: " + rawId;
-        warningSink.accept("Invalid similar-block config entry (raw value: "
-                + String.valueOf(rawGroup) + detail + ")");
+        warningSink.accept("Invalid similar-block config entry (raw value: " + rawGroup + detail + ")");
+    }
+
+    public Set<Item> matchingItems(Item item) {
+        Set<Item> matches = matchingItems.get(item);
+        return matches == null ? Collections.emptySet() : matches;
+    }
+
+    public boolean matchBlocks(Block first, Block second) {
+        if (first == second) {
+            return true;
+        }
+        if (first == Blocks.AIR || second == Blocks.AIR) {
+            return false;
+        }
+
+        Item firstItem = Item.getItemFromBlock(first);
+        Item secondItem = Item.getItemFromBlock(second);
+        return matchingItems(firstItem).contains(secondItem);
     }
 }

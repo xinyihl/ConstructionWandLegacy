@@ -1,12 +1,6 @@
 package com.xinyihl.constructionwandlegacy.compat.projecte;
 
-import com.xinyihl.constructionwandlegacy.material.MaterialCollector;
-import com.xinyihl.constructionwandlegacy.material.MaterialKey;
-import com.xinyihl.constructionwandlegacy.material.MaterialReceipt;
-import com.xinyihl.constructionwandlegacy.material.MaterialSource;
-import com.xinyihl.constructionwandlegacy.material.MaterialSourceFactory;
-import com.xinyihl.constructionwandlegacy.material.SaturatedAmounts;
-import com.xinyihl.constructionwandlegacy.material.SharedMaterialBudget;
+import com.xinyihl.constructionwandlegacy.material.*;
 import com.xinyihl.constructionwandlegacy.material.source.InventoryRefunds;
 import moze_intel.projecte.api.ProjectEAPI;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
@@ -25,8 +19,7 @@ public final class ProjectEMaterialSourceFactory implements MaterialSourceFactor
     @Override
     @Optional.Method(modid = "projecte")
     public MaterialSource create(EntityPlayer player, ItemStack wand) {
-        IKnowledgeProvider knowledge = ProjectEAPI.getTransmutationProxy()
-                .getKnowledgeProviderFor(player.getPersistentID());
+        IKnowledgeProvider knowledge = ProjectEAPI.getTransmutationProxy().getKnowledgeProviderFor(player.getPersistentID());
         IEMCProxy emc = ProjectEAPI.getEMCProxy();
         return knowledge == null || emc == null ? null : new ProjectEMaterialSource(player, knowledge, emc);
     }
@@ -111,8 +104,7 @@ public final class ProjectEMaterialSourceFactory implements MaterialSourceFactor
                 long cost = unitValue * extracted;
                 knowledge.setEmc(currentEmc - cost);
                 sync();
-                return MaterialReceipt.of(ID, key, extracted,
-                        (refundKey, refundCount) -> refund(refundKey, refundCount, unitValue));
+                return MaterialReceipt.of(ID, key, extracted, (refundKey, refundCount) -> refund(refundKey, refundCount, unitValue));
             } catch (RuntimeException exception) {
                 return MaterialReceipt.empty();
             }
@@ -137,8 +129,7 @@ public final class ProjectEMaterialSourceFactory implements MaterialSourceFactor
                 return false;
             }
             try {
-                return ProjectEAPI.getTransmutationProxy()
-                        .getKnowledgeProviderFor(player.getPersistentID()) == knowledge;
+                return ProjectEAPI.getTransmutationProxy().getKnowledgeProviderFor(player.getPersistentID()) == knowledge;
             } catch (RuntimeException exception) {
                 return false;
             }

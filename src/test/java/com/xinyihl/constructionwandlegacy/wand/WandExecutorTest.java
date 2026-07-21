@@ -1,11 +1,6 @@
 package com.xinyihl.constructionwandlegacy.wand;
 
-import com.xinyihl.constructionwandlegacy.material.MaterialCollector;
-import com.xinyihl.constructionwandlegacy.material.MaterialKey;
-import com.xinyihl.constructionwandlegacy.material.MaterialReceipt;
-import com.xinyihl.constructionwandlegacy.material.MaterialReservation;
-import com.xinyihl.constructionwandlegacy.material.MaterialSession;
-import com.xinyihl.constructionwandlegacy.material.MaterialSource;
+import com.xinyihl.constructionwandlegacy.material.*;
 import com.xinyihl.constructionwandlegacy.wand.undo.UndoService;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,10 +23,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class WandExecutorTest {
     private static final Item ITEM = new Item().setRegistryName(new ResourceLocation("test", "executor"));
@@ -41,14 +33,25 @@ public class WandExecutorTest {
         Bootstrap.register();
     }
 
+    private static WandExecutor executor() {
+        return new WandExecutor(new UndoService(LogManager.getLogger("executor-test")), LogManager.getLogger("executor-test"));
+    }
+
+    private static WandPlan plan(FakeOperation... operations) {
+        Map<WandOperation, MaterialReservation> reservations = new IdentityHashMap<>();
+        for (FakeOperation operation : operations) {
+            if (operation.reservation != null) {
+                reservations.put(operation, operation.reservation);
+            }
+        }
+        return new WandPlan(Arrays.asList(operations), reservations);
+    }
+
     @Test
     public void bestEffortExecutionRecordsOnlySuccessfulOperations() {
         FakeChange first = new FakeChange(BlockPos.ORIGIN);
         FakeChange third = new FakeChange(BlockPos.ORIGIN.east());
-        WandPlan plan = plan(
-                FakeOperation.applied(first, null),
-                FakeOperation.rejected(BlockPos.ORIGIN.up()),
-                FakeOperation.applied(third, null));
+        WandPlan plan = plan(FakeOperation.applied(first, null), FakeOperation.rejected(BlockPos.ORIGIN.up()), FakeOperation.applied(third, null));
         TestAccess access = new TestAccess(true);
 
         WandExecutor.ExecutionResult result = executor().execute(null, plan, access);
@@ -66,8 +69,7 @@ public class WandExecutorTest {
     @Test
     public void materialCommitFailureRestoresReplaceableOriginalAndContinues() {
         MaterialKey key = MaterialKey.of(new ItemStack(ITEM));
-        MaterialSession session = new MaterialSession(Collections.singletonList(
-                new TestSource(key, false, new AtomicInteger())));
+        MaterialSession session = new MaterialSession(Collections.singletonList(new TestSource(key, false, new AtomicInteger())));
         MaterialReservation reservation = session.reserve(key, 1);
         AtomicReference<String> worldState = new AtomicReference<>("placed_block");
         FakeChange failedChange = new FakeChange(BlockPos.ORIGIN, () -> {
@@ -75,9 +77,7 @@ public class WandExecutorTest {
             return true;
         });
         FakeChange successfulChange = new FakeChange(BlockPos.ORIGIN.east());
-        WandPlan plan = plan(
-                FakeOperation.applied(failedChange, reservation),
-                FakeOperation.applied(successfulChange, null));
+        WandPlan plan = plan(FakeOperation.applied(failedChange, reservation), FakeOperation.applied(successfulChange, null));
         TestAccess access = new TestAccess(true);
 
         WandExecutor.ExecutionResult result = executor().execute(null, plan, access);
@@ -93,8 +93,7 @@ public class WandExecutorTest {
     public void damageFailureRefundsCommittedMaterialAndRollsBackWorld() {
         MaterialKey key = MaterialKey.of(new ItemStack(ITEM));
         AtomicInteger refunds = new AtomicInteger();
-        MaterialSession session = new MaterialSession(Collections.singletonList(
-                new TestSource(key, true, refunds)));
+        MaterialSession session = new MaterialSession(Collections.singletonList(new TestSource(key, true, refunds)));
         FakeChange change = new FakeChange(BlockPos.ORIGIN);
         WandPlan plan = plan(FakeOperation.applied(change, session.reserve(key, 1)));
         TestAccess access = new TestAccess(false);
@@ -105,15 +104,14 @@ public class WandExecutorTest {
         assertFalse(result.isSuccess());
         assertEquals(1, refunds.get());
         assertEquals(1, change.rollbacks);
-        assertEquals(null, access.recorded);
+        assertNull(access.recorded);
     }
 
     @Test
     public void rollbackFailureDoesNotRefundAndCreatesPendingRecovery() {
         MaterialKey key = MaterialKey.of(new ItemStack(ITEM));
         AtomicInteger refunds = new AtomicInteger();
-        MaterialSession session = new MaterialSession(Collections.singletonList(
-                new TestSource(key, true, refunds)));
+        MaterialSession session = new MaterialSession(Collections.singletonList(new TestSource(key, true, refunds)));
         FakeChange change = new FakeChange(BlockPos.ORIGIN, () -> false);
         WandPlan plan = plan(FakeOperation.applied(change, session.reserve(key, 1)));
         TestAccess access = new TestAccess(false);
@@ -130,8 +128,7 @@ public class WandExecutorTest {
     public void rollbackExceptionDoesNotRefundAndCreatesPendingRecovery() {
         MaterialKey key = MaterialKey.of(new ItemStack(ITEM));
         AtomicInteger refunds = new AtomicInteger();
-        MaterialSession session = new MaterialSession(Collections.singletonList(
-                new TestSource(key, true, refunds)));
+        MaterialSession session = new MaterialSession(Collections.singletonList(new TestSource(key, true, refunds)));
         FakeChange change = new FakeChange(BlockPos.ORIGIN, () -> {
             throw new IllegalStateException("rollback exploded");
         });
@@ -146,19 +143,8 @@ public class WandExecutorTest {
         assertEquals(1, access.pendingCount);
     }
 
-    private static WandExecutor executor() {
-        return new WandExecutor(new UndoService(LogManager.getLogger("executor-test")),
-                LogManager.getLogger("executor-test"));
-    }
-
-    private static WandPlan plan(FakeOperation... operations) {
-        Map<WandOperation, MaterialReservation> reservations = new IdentityHashMap<>();
-        for (FakeOperation operation : operations) {
-            if (operation.reservation != null) {
-                reservations.put(operation, operation.reservation);
-            }
-        }
-        return new WandPlan(Arrays.asList(operations), reservations);
+    private interface Rollback {
+        boolean run();
     }
 
     private static final class TestAccess implements WandExecutor.ExecutionAccess {
@@ -209,8 +195,7 @@ public class WandExecutorTest {
         }
 
         @Override
-        public void recordPending(WandOperation.AppliedChange change, @Nullable MaterialReceipt receipt,
-                                  boolean worldRestored) {
+        public void recordPending(WandOperation.AppliedChange change, @Nullable MaterialReceipt receipt, boolean worldRestored) {
             pendingCount++;
         }
     }
@@ -277,19 +262,13 @@ public class WandExecutorTest {
         @Override
         public WandOperation.RollbackResult rollback(World world) {
             rollbacks++;
-            return rollback.run()
-                    ? WandOperation.RollbackResult.restored()
-                    : WandOperation.RollbackResult.notRestored("fake rollback rejected");
+            return rollback.run() ? WandOperation.RollbackResult.restored() : WandOperation.RollbackResult.notRestored("fake rollback rejected");
         }
 
         @Override
         public WandOperation.RollbackResult restore(World world, EntityPlayer player) {
             return WandOperation.RollbackResult.restored();
         }
-    }
-
-    private interface Rollback {
-        boolean run();
     }
 
     private static final class TestSource implements MaterialSource {

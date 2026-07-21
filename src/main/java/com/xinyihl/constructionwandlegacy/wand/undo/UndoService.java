@@ -12,15 +12,7 @@ import net.minecraft.world.World;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class UndoService {
     private static final int HISTORY_SIZE = 10;
@@ -48,15 +40,16 @@ public final class UndoService {
         }
     }
 
-    /** Stores a recovery that could not safely refund because world restoration failed. */
-    public void recordPending(EntityPlayer player, WandOperation.AppliedChange change,
-                              @Nullable MaterialReceipt receipt, boolean worldRestored) {
-        getEntry(player.getUniqueID()).pending.addLast(new PendingEntry(
-                player.world.provider.getDimension(), change,
-                receipt == null ? MaterialReceipt.empty() : receipt, worldRestored));
+    /**
+     * Stores a recovery that could not safely refund because world restoration failed.
+     */
+    public void recordPending(EntityPlayer player, WandOperation.AppliedChange change, @Nullable MaterialReceipt receipt, boolean worldRestored) {
+        getEntry(player.getUniqueID()).pending.addLast(new PendingEntry(player.world.provider.getDimension(), change, receipt == null ? MaterialReceipt.empty() : receipt, worldRestored));
     }
 
-    /** Retries pending world recovery/refunds against the player's current world. */
+    /**
+     * Retries pending world recovery/refunds against the player's current world.
+     */
     public boolean retryPending(EntityPlayer player) {
         PlayerEntry entry = getEntry(player.getUniqueID());
         boolean changed = false;
@@ -110,8 +103,7 @@ public final class UndoService {
 
         WandTransaction.RecoveryResult result = transaction.recover(world, player);
         if (!result.isComplete() && result.getFailure() != null) {
-            logger.error("Wand transaction recovery was not completed: {}",
-                    result.getFailure().getMessage(), result.getFailure().getCause());
+            logger.error("Wand transaction recovery was not completed: {}", result.getFailure().getMessage(), result.getFailure().getCause());
         }
         if (result.isComplete() && transaction.isComplete()) {
             entries.removeLast();
@@ -159,8 +151,7 @@ public final class UndoService {
         }
         PlayerEntry entry = getEntry(player.getUniqueID());
         if (entry.undoActive) {
-            ModMessages.sendToPlayer(
-                    new PacketUndoBlocks(peekLastPositions(player)), (EntityPlayerMP) player);
+            ModMessages.sendToPlayer(new PacketUndoBlocks(peekLastPositions(player)), (EntityPlayerMP) player);
         }
     }
 
@@ -177,8 +168,7 @@ public final class UndoService {
         private boolean worldRestored;
         private boolean materialRefunded;
 
-        private PendingEntry(int dimension, WandOperation.AppliedChange change, MaterialReceipt receipt,
-                             boolean worldRestored) {
+        private PendingEntry(int dimension, WandOperation.AppliedChange change, MaterialReceipt receipt, boolean worldRestored) {
             this.dimension = dimension;
             this.change = change;
             this.receipt = receipt;

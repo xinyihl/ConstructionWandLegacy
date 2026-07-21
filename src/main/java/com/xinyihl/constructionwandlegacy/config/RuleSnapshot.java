@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Immutable, bounded representation of the server rules sent to clients. */
+/**
+ * Immutable, bounded representation of the server rules sent to clients.
+ */
 public final class RuleSnapshot {
     public static final int MAX_RULE_ENTRIES = 1024;
     public static final int MAX_RULE_BYTES = 512;
@@ -25,10 +27,7 @@ public final class RuleSnapshot {
     private final List<String> propertyCopyWhitelist;
     private final List<String> similarBlocks;
 
-    private RuleSnapshot(long revision, int stoneLimit, int ironLimit, int diamondLimit,
-                         int infinityLimit, boolean allowTileEntityPlacement,
-                         List<String> placementWhitelist, List<String> placementBlacklist,
-                         List<String> propertyCopyWhitelist, List<String> similarBlocks) {
+    private RuleSnapshot(long revision, int stoneLimit, int ironLimit, int diamondLimit, int infinityLimit, boolean allowTileEntityPlacement, List<String> placementWhitelist, List<String> placementBlacklist, List<String> propertyCopyWhitelist, List<String> similarBlocks) {
         this.revision = revision;
         this.stoneLimit = requireLimit(stoneLimit);
         this.ironLimit = requireLimit(ironLimit);
@@ -41,29 +40,12 @@ public final class RuleSnapshot {
         this.similarBlocks = immutableRules(similarBlocks);
     }
 
-    public static RuleSnapshot create(long revision, int stoneLimit, int ironLimit,
-                                      int diamondLimit, int infinityLimit,
-                                      boolean allowTileEntityPlacement,
-                                      List<String> placementWhitelist,
-                                      List<String> placementBlacklist,
-                                      List<String> propertyCopyWhitelist,
-                                      List<String> similarBlocks) {
-        return new RuleSnapshot(revision, stoneLimit, ironLimit, diamondLimit, infinityLimit,
-                allowTileEntityPlacement, placementWhitelist, placementBlacklist,
-                propertyCopyWhitelist, similarBlocks);
+    public static RuleSnapshot create(long revision, int stoneLimit, int ironLimit, int diamondLimit, int infinityLimit, boolean allowTileEntityPlacement, List<String> placementWhitelist, List<String> placementBlacklist, List<String> propertyCopyWhitelist, List<String> similarBlocks) {
+        return new RuleSnapshot(revision, stoneLimit, ironLimit, diamondLimit, infinityLimit, allowTileEntityPlacement, placementWhitelist, placementBlacklist, propertyCopyWhitelist, similarBlocks);
     }
 
     static RuleSnapshot fromConfig(long revision) {
-        return create(revision,
-                ModConfig.wandLimits.stoneWandMaxBlocks,
-                ModConfig.wandLimits.ironWandMaxBlocks,
-                ModConfig.wandLimits.diamondWandMaxBlocks,
-                ModConfig.wandLimits.infinityWandMaxBlocks,
-                ModConfig.placement.allowTileEntityPlacement,
-                sanitize(ModConfig.placement.blockWhitelist, "placement whitelist"),
-                sanitize(ModConfig.placement.blockBlacklist, "placement blacklist"),
-                sanitize(ModConfig.placement.propertyCopyWhitelist, "property copy whitelist"),
-                sanitize(ModConfig.matching.similarBlocks, "similar blocks"));
+        return create(revision, ModConfig.wandLimits.stoneWandMaxBlocks, ModConfig.wandLimits.ironWandMaxBlocks, ModConfig.wandLimits.diamondWandMaxBlocks, ModConfig.wandLimits.infinityWandMaxBlocks, ModConfig.placement.allowTileEntityPlacement, sanitize(ModConfig.placement.blockWhitelist, "placement whitelist"), sanitize(ModConfig.placement.blockBlacklist, "placement blacklist"), sanitize(ModConfig.placement.propertyCopyWhitelist, "property copy whitelist"), sanitize(ModConfig.matching.similarBlocks, "similar blocks"));
     }
 
     private static List<String> sanitize(String[] values, String name) {
@@ -73,13 +55,11 @@ public final class RuleSnapshot {
         ArrayList<String> result = new ArrayList<>(Math.min(values.length, MAX_RULE_ENTRIES));
         for (String value : values) {
             if (result.size() == MAX_RULE_ENTRIES) {
-                ConfigWarnings.warn("Too many " + name + " entries; ignoring entries after "
-                        + MAX_RULE_ENTRIES);
+                ConfigWarnings.warn("Too many " + name + " entries; ignoring entries after " + MAX_RULE_ENTRIES);
                 break;
             }
             if (!isBounded(value)) {
-                ConfigWarnings.warn("Ignoring oversized or null " + name + " entry: "
-                        + String.valueOf(value));
+                ConfigWarnings.warn("Ignoring oversized or null " + name + " entry: " + value);
                 continue;
             }
             result.add(value);

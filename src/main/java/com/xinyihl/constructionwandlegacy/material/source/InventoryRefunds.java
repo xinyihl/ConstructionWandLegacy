@@ -1,8 +1,8 @@
 package com.xinyihl.constructionwandlegacy.material.source;
 
 import com.xinyihl.constructionwandlegacy.material.MaterialKey;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
 public final class InventoryRefunds {

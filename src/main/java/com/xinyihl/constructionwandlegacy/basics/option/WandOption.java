@@ -8,12 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum WandOption {
-    CORES(0, "cores"),
-    LOCK(1, "lock"),
-    DIRECTION(2, "direction"),
-    REPLACE(3, "replace"),
-    MATCH(4, "match"),
-    RANDOM(5, "random");
+    CORES(0, "cores"), LOCK(1, "lock"), DIRECTION(2, "direction"), REPLACE(3, "replace"), MATCH(4, "match"), RANDOM(5, "random");
 
     private static final Map<String, WandOption> BY_ID;
 
@@ -31,6 +26,21 @@ public enum WandOption {
     WandOption(int networkId, String id) {
         this.networkId = networkId;
         this.id = id;
+    }
+
+    @Nullable
+    public static WandOption fromId(String id) {
+        return id == null ? null : BY_ID.get(id);
+    }
+
+    @Nullable
+    public static WandOption fromNetworkId(int id) {
+        for (WandOption option : values()) {
+            if (option.networkId == id) {
+                return option;
+            }
+        }
+        return null;
     }
 
     public int getNetworkId() {
@@ -51,20 +61,5 @@ public enum WandOption {
 
     public String getDescriptionTranslation(WandState state) {
         return getValueTranslation(state) + ".desc";
-    }
-
-    @Nullable
-    public static WandOption fromId(String id) {
-        return id == null ? null : BY_ID.get(id);
-    }
-
-    @Nullable
-    public static WandOption fromNetworkId(int id) {
-        for (WandOption option : values()) {
-            if (option.networkId == id) {
-                return option;
-            }
-        }
-        return null;
     }
 }

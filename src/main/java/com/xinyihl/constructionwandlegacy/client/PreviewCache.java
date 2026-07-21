@@ -8,8 +8,7 @@ final class PreviewCache {
     private PreviewKey key;
     private PreviewSnapshot snapshot = PreviewSnapshot.empty();
 
-    PreviewSnapshot update(long clientTick, PreviewKey nextKey,
-                           Supplier<PreviewSnapshot> planner) {
+    PreviewSnapshot update(long clientTick, PreviewKey nextKey, Supplier<PreviewSnapshot> planner) {
         if (clientTick == lastAttemptedClientTick) {
             return snapshot;
         }

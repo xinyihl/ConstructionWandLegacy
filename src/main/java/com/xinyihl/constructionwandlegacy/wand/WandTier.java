@@ -3,10 +3,7 @@ package com.xinyihl.constructionwandlegacy.wand;
 import com.xinyihl.constructionwandlegacy.config.ModConfig;
 
 public enum WandTier {
-    STONE(new WandSpec(9, 131, 16, 9, 1024)),
-    IRON(new WandSpec(27, 250, 32, 27, 1024)),
-    DIAMOND(new WandSpec(81, 1561, 64, 81, 1024)),
-    INFINITY(new WandSpec(256, Integer.MAX_VALUE, 128, 256, 1024));
+    STONE(new WandSpec(9, 131, 16, 9, 1024)), IRON(new WandSpec(27, 250, 32, 27, 1024)), DIAMOND(new WandSpec(81, 1561, 64, 81, 1024)), INFINITY(new WandSpec(256, Integer.MAX_VALUE, 128, 256, 1024));
 
     private final WandSpec spec;
 

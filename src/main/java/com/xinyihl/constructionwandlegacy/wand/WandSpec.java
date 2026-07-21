@@ -10,8 +10,7 @@ public final class WandSpec {
     private final int destructionLimit;
     private final int creativePlacementLimit;
 
-    public WandSpec(int basePlacementLimit, int durability, int angelRange, int destructionLimit,
-                    int creativePlacementLimit) {
+    public WandSpec(int basePlacementLimit, int durability, int angelRange, int destructionLimit, int creativePlacementLimit) {
         if (basePlacementLimit < 1) {
             throw new IllegalArgumentException("basePlacementLimit must be positive");
         }

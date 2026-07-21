@@ -102,8 +102,7 @@ public final class PortableContainerAccess {
 
         @Override
         public boolean isValid(ItemStack currentOwner) {
-            if (currentOwner != owner || currentOwner.isEmpty()
-                    || !currentOwner.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)) {
+            if (currentOwner != owner || currentOwner.isEmpty() || !currentOwner.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)) {
                 return false;
             }
             try {
@@ -164,8 +163,7 @@ public final class PortableContainerAccess {
             ItemStack remaining = stack.copy();
             for (int slot = 0; slot < items.size() && !remaining.isEmpty(); slot++) {
                 ItemStack current = items.get(slot);
-                if (!current.isEmpty() && ItemStack.areItemsEqual(current, remaining)
-                        && ItemStack.areItemStackTagsEqual(current, remaining)) {
+                if (!current.isEmpty() && ItemStack.areItemsEqual(current, remaining) && ItemStack.areItemStackTagsEqual(current, remaining)) {
                     int accepted = Math.min(remaining.getCount(), current.getMaxStackSize() - current.getCount());
                     if (accepted > 0) {
                         current.grow(accepted);
@@ -187,8 +185,7 @@ public final class PortableContainerAccess {
 
         @Override
         public boolean isValid(ItemStack currentOwner) {
-            return valid && currentOwner == owner && !currentOwner.isEmpty() && currentOwner.getCount() == 1
-                    && Block.getBlockFromItem(currentOwner.getItem()) instanceof BlockShulkerBox;
+            return valid && currentOwner == owner && !currentOwner.isEmpty() && currentOwner.getCount() == 1 && Block.getBlockFromItem(currentOwner.getItem()) instanceof BlockShulkerBox;
         }
 
         @Override

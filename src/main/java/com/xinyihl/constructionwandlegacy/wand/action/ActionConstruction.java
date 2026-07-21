@@ -38,13 +38,10 @@ public final class ActionConstruction implements WandAction {
         EnumFacing placeDirection = hit.sideHit;
         IBlockState targetBlock = context.getWorld().getBlockState(hit.getBlockPos());
         BlockPos startingPoint = hit.getBlockPos().offset(placeDirection);
-        return PlaneTraversal.traverse(startingPoint, placeDirection, context.getState().getLock(), limit,
-                candidate -> {
-                    BlockPos supportPos = candidate.offset(placeDirection.getOpposite());
-                    IBlockState supportingBlock = context.getWorld().getBlockState(supportPos);
-                    return context.matchesBlocks(targetBlock, supportingBlock)
-                            ? resolver.createPlacement(candidate, supportingBlock)
-                            : null;
-                });
+        return PlaneTraversal.traverse(startingPoint, placeDirection, context.getState().getLock(), limit, candidate -> {
+            BlockPos supportPos = candidate.offset(placeDirection.getOpposite());
+            IBlockState supportingBlock = context.getWorld().getBlockState(supportPos);
+            return context.matchesBlocks(targetBlock, supportingBlock) ? resolver.createPlacement(candidate, supportingBlock) : null;
+        });
     }
 }

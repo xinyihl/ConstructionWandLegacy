@@ -13,9 +13,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.event.world.WorldEvent;
 import org.lwjgl.input.Keyboard;
 
 public class ClientEvents {
@@ -78,8 +78,7 @@ public class ClientEvents {
             return;
         }
         WandState state = WandDataCodec.read(preview);
-        ModMessages.sendToServer(new PacketWandOption(WandOption.LOCK, target,
-                WandDataCodec.getNetworkValue(state, WandOption.LOCK), true));
+        ModMessages.sendToServer(new PacketWandOption(WandOption.LOCK, target, WandDataCodec.getNetworkValue(state, WandOption.LOCK), true));
         event.setCanceled(true);
     }
 
@@ -99,8 +98,7 @@ public class ClientEvents {
             return;
         }
         WandState state = WandDataCodec.read(preview);
-        ModMessages.sendToServer(new PacketWandOption(WandOption.CORES, target,
-                WandDataCodec.getNetworkValue(state, WandOption.CORES), true));
+        ModMessages.sendToServer(new PacketWandOption(WandOption.CORES, target, WandDataCodec.getNetworkValue(state, WandOption.CORES), true));
     }
 
     @SubscribeEvent

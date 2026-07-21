@@ -16,7 +16,9 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-/** Read-only inputs captured for one planning and execution attempt. */
+/**
+ * Read-only inputs captured for one planning and execution attempt.
+ */
 public final class WandContext {
     private final EntityPlayer player;
     private final World world;
@@ -31,9 +33,7 @@ public final class WandContext {
     private final PlacementRules placementRules;
     private final BlockEquivalenceIndex blockEquivalenceIndex;
 
-    private WandContext(EntityPlayer player, World world, @Nullable RayTraceResult rayTraceResult,
-                        ItemStack wand, ItemWand wandItem, WandState state,
-                        ConfigRuntime.Snapshot rules) {
+    private WandContext(EntityPlayer player, World world, @Nullable RayTraceResult rayTraceResult, ItemStack wand, ItemWand wandItem, WandState state, ConfigRuntime.Snapshot rules) {
         this.player = Objects.requireNonNull(player, "player");
         this.world = Objects.requireNonNull(world, "world");
         this.rayTraceResult = rayTraceResult;
@@ -47,19 +47,15 @@ public final class WandContext {
         this.blockEquivalenceIndex = rules.getBlockEquivalenceIndex();
     }
 
-    public static WandContext create(EntityPlayer player, World world,
-                                     @Nullable RayTraceResult rayTraceResult, ItemStack wand) {
+    public static WandContext create(EntityPlayer player, World world, @Nullable RayTraceResult rayTraceResult, ItemStack wand) {
         return create(player, world, rayTraceResult, wand, ConfigRuntime.getSnapshot());
     }
 
-    public static WandContext create(EntityPlayer player, World world,
-                                     @Nullable RayTraceResult rayTraceResult, ItemStack wand,
-                                     ConfigRuntime.Snapshot rules) {
+    public static WandContext create(EntityPlayer player, World world, @Nullable RayTraceResult rayTraceResult, ItemStack wand, ConfigRuntime.Snapshot rules) {
         if (wand == null || wand.isEmpty() || !(wand.getItem() instanceof ItemWand)) {
             throw new IllegalArgumentException("Wand context requires a non-empty wand stack");
         }
-        return new WandContext(player, world, rayTraceResult, wand, (ItemWand) wand.getItem(),
-                WandDataCodec.read(wand), Objects.requireNonNull(rules, "rules"));
+        return new WandContext(player, world, rayTraceResult, wand, (ItemWand) wand.getItem(), WandDataCodec.read(wand), Objects.requireNonNull(rules, "rules"));
     }
 
     public EntityPlayer getPlayer() {
@@ -79,7 +75,9 @@ public final class WandContext {
         return wand.copy();
     }
 
-    /** Server-only execution access; callers outside the wand package receive a copy. */
+    /**
+     * Server-only execution access; callers outside the wand package receive a copy.
+     */
     ItemStack getMutableWand() {
         return wand;
     }

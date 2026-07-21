@@ -8,8 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public final class PreviewSnapshot {
-    private static final PreviewSnapshot EMPTY = new PreviewSnapshot(
-            null, Collections.emptySet(), PreviewColor.BLACK);
+    private static final PreviewSnapshot EMPTY = new PreviewSnapshot(null, Collections.emptySet(), PreviewColor.BLACK);
 
     @Nullable
     private final PreviewKey key;
@@ -72,9 +71,7 @@ public final class PreviewSnapshot {
             if (color < 0) {
                 return BLACK;
             }
-            return new PreviewColor(((color >> 16) & 0xFF) / 255.0F,
-                    ((color >> 8) & 0xFF) / 255.0F,
-                    (color & 0xFF) / 255.0F);
+            return new PreviewColor(((color >> 16) & 0xFF) / 255.0F, ((color >> 8) & 0xFF) / 255.0F, (color & 0xFF) / 255.0F);
         }
 
         public float getRed() {

@@ -2,11 +2,7 @@ package com.xinyihl.constructionwandlegacy.compat.baubles;
 
 import baubles.api.BaublesApi;
 import baubles.api.cap.IBaublesItemHandler;
-import com.xinyihl.constructionwandlegacy.material.MaterialCollector;
-import com.xinyihl.constructionwandlegacy.material.MaterialKey;
-import com.xinyihl.constructionwandlegacy.material.MaterialReceipt;
-import com.xinyihl.constructionwandlegacy.material.MaterialSource;
-import com.xinyihl.constructionwandlegacy.material.MaterialSourceFactory;
+import com.xinyihl.constructionwandlegacy.material.*;
 import com.xinyihl.constructionwandlegacy.material.source.CapturedEndpointIdentity;
 import com.xinyihl.constructionwandlegacy.material.source.InventoryRefunds;
 import com.xinyihl.constructionwandlegacy.material.source.PortableContainerAccess;
@@ -25,6 +21,12 @@ public final class BaublesMaterialSourceFactory implements MaterialSourceFactory
     public MaterialSource create(EntityPlayer player, ItemStack wand) {
         IBaublesItemHandler handler = BaublesApi.getBaublesHandler(player);
         return handler == null ? null : new BaublesMaterialSource(player, handler);
+    }
+
+    private interface Endpoint {
+        int extract(MaterialKey key, int count);
+
+        int refund(EntityPlayer player, MaterialKey key, int count);
     }
 
     private static final class BaublesMaterialSource implements MaterialSource {
@@ -52,8 +54,7 @@ public final class BaublesMaterialSourceFactory implements MaterialSourceFactory
                 ItemStack stack = handler.getStackInSlot(slot);
                 if (!stack.isEmpty() && stack.getCount() > 0) {
                     MaterialKey key = MaterialKey.of(stack);
-                    endpointsByKey.computeIfAbsent(key, ignored -> new ArrayList<>())
-                            .add(new BaubleSlotEndpoint(player, handler, slot));
+                    endpointsByKey.computeIfAbsent(key, ignored -> new ArrayList<>()).add(new BaubleSlotEndpoint(player, handler, slot));
                     collector.accept(key, stack.getCount());
                 }
 
@@ -67,8 +68,7 @@ public final class BaublesMaterialSourceFactory implements MaterialSourceFactory
                         continue;
                     }
                     MaterialKey key = MaterialKey.of(innerStack);
-                    endpointsByKey.computeIfAbsent(key, ignored -> new ArrayList<>())
-                            .add(new ContainerEndpoint(player, handler, slot, stack, access, innerSlot));
+                    endpointsByKey.computeIfAbsent(key, ignored -> new ArrayList<>()).add(new ContainerEndpoint(player, handler, slot, stack, access, innerSlot));
                     collector.accept(key, innerStack.getCount());
                 }
             }
@@ -91,8 +91,7 @@ public final class BaublesMaterialSourceFactory implements MaterialSourceFactory
                     break;
                 }
                 if (extracted > 0) {
-                    receipts.add(MaterialReceipt.of(ID, key, extracted,
-                            (refundKey, refundAmount) -> endpoint.refund(player, refundKey, refundAmount)));
+                    receipts.add(MaterialReceipt.of(ID, key, extracted, (refundKey, refundAmount) -> endpoint.refund(player, refundKey, refundAmount)));
                     remaining -= extracted;
                 }
                 if (remaining == 0) {
@@ -101,12 +100,6 @@ public final class BaublesMaterialSourceFactory implements MaterialSourceFactory
             }
             return MaterialReceipt.combine(receipts);
         }
-    }
-
-    private interface Endpoint {
-        int extract(MaterialKey key, int count);
-
-        int refund(EntityPlayer player, MaterialKey key, int count);
     }
 
     private static final class BaubleSlotEndpoint implements Endpoint {
@@ -192,9 +185,7 @@ public final class BaublesMaterialSourceFactory implements MaterialSourceFactory
         private final ItemStack owner;
         private final int slot;
 
-        private ContainerEndpoint(EntityPlayer player, IBaublesItemHandler parent,
-                                  int parentSlot, ItemStack owner,
-                                  PortableContainerAccess.ContainerAccess access, int slot) {
+        private ContainerEndpoint(EntityPlayer player, IBaublesItemHandler parent, int parentSlot, ItemStack owner, PortableContainerAccess.ContainerAccess access, int slot) {
             this.player = player;
             this.parent = parent;
             this.parentSlot = parentSlot;
@@ -233,12 +224,7 @@ public final class BaublesMaterialSourceFactory implements MaterialSourceFactory
                 return false;
             }
             try {
-                return CapturedEndpointIdentity.matches(
-                        parent,
-                        BaublesApi.getBaublesHandler(player),
-                        owner,
-                        parent.getStackInSlot(parentSlot))
-                        && access.isValid(owner);
+                return CapturedEndpointIdentity.matches(parent, BaublesApi.getBaublesHandler(player), owner, parent.getStackInSlot(parentSlot)) && access.isValid(owner);
             } catch (RuntimeException exception) {
                 return false;
             }

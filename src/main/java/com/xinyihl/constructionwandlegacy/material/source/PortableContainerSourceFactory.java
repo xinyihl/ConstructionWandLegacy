@@ -1,10 +1,6 @@
 package com.xinyihl.constructionwandlegacy.material.source;
 
-import com.xinyihl.constructionwandlegacy.material.MaterialCollector;
-import com.xinyihl.constructionwandlegacy.material.MaterialKey;
-import com.xinyihl.constructionwandlegacy.material.MaterialReceipt;
-import com.xinyihl.constructionwandlegacy.material.MaterialSource;
-import com.xinyihl.constructionwandlegacy.material.MaterialSourceFactory;
+import com.xinyihl.constructionwandlegacy.material.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
@@ -63,8 +59,7 @@ public final class PortableContainerSourceFactory implements MaterialSourceFacto
                     continue;
                 }
                 MaterialKey key = MaterialKey.of(stack);
-                slotsByKey.computeIfAbsent(key, ignored -> new ArrayList<>())
-                        .add(new Slot(ownerSlot, owner, access, slotIndex));
+                slotsByKey.computeIfAbsent(key, ignored -> new ArrayList<>()).add(new Slot(ownerSlot, owner, access, slotIndex));
                 collector.accept(key, stack.getCount());
             }
         }
@@ -91,8 +86,7 @@ public final class PortableContainerSourceFactory implements MaterialSourceFacto
                         break;
                     }
                     remaining -= extractedCount;
-                    receipts.add(MaterialReceipt.of(ID, key, extractedCount,
-                            (refundKey, refundCount) -> refund(slot, refundKey, refundCount)));
+                    receipts.add(MaterialReceipt.of(ID, key, extractedCount, (refundKey, refundCount) -> refund(slot, refundKey, refundCount)));
                 }
                 if (remaining == 0) {
                     break;
@@ -137,8 +131,7 @@ public final class PortableContainerSourceFactory implements MaterialSourceFacto
         private final PortableContainerAccess.ContainerAccess access;
         private final int index;
 
-        private Slot(OwnerSlot ownerSlot, ItemStack owner,
-                     PortableContainerAccess.ContainerAccess access, int index) {
+        private Slot(OwnerSlot ownerSlot, ItemStack owner, PortableContainerAccess.ContainerAccess access, int index) {
             this.ownerSlot = ownerSlot;
             this.owner = owner;
             this.access = access;

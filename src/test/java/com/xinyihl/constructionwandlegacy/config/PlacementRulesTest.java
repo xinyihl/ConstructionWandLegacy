@@ -17,9 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class PlacementRulesTest {
     private static final String BLOCK_ID = "test:rule_block";
@@ -29,13 +27,21 @@ public class PlacementRulesTest {
         Bootstrap.register();
     }
 
+    private static PlacementRules compileWithTestBlock(String[] whitelist, String[] blacklist, String[] propertyKeywords, boolean allowTileEntities, Consumer<String> warningSink) {
+        return PlacementRules.compile(whitelist, blacklist, propertyKeywords, allowTileEntities, warningSink, id -> BLOCK_ID.equals(id.toString()));
+    }
+
+    private static ItemStack stackFor(Block block) {
+        Item item = new ItemBlock(block).setRegistryName(new ResourceLocation("test", "rule_block_item"));
+        return new ItemStack(item);
+    }
+
     @Test
     public void whitelistParsesBlockIdAndOptionalMetadata() {
         TestMetaBlock block = new TestMetaBlock(false);
         ItemStack stack = stackFor(block);
         List<String> warnings = new ArrayList<>();
-        PlacementRules rules = compileWithTestBlock(
-                new String[]{"  " + BLOCK_ID + "@1  "}, new String[0], new String[0], false, warnings::add);
+        PlacementRules rules = compileWithTestBlock(new String[]{"  " + BLOCK_ID + "@1  "}, new String[0], new String[0], false, warnings::add);
 
         assertTrue(rules.isPlacementAllowed(stack, block.state(true)));
         assertFalse(rules.isPlacementAllowed(stack, block.state(false)));
@@ -46,8 +52,8 @@ public class PlacementRulesTest {
     public void blacklistRejectsMatchingStateButNotOtherMetadata() {
         TestMetaBlock block = new TestMetaBlock(false);
         ItemStack stack = stackFor(block);
-        PlacementRules rules = compileWithTestBlock(
-                new String[0], new String[]{BLOCK_ID + "@1"}, new String[0], false, ignored -> { });
+        PlacementRules rules = compileWithTestBlock(new String[0], new String[]{BLOCK_ID + "@1"}, new String[0], false, ignored -> {
+        });
 
         assertFalse(rules.isPlacementAllowed(stack, block.state(true)));
         assertTrue(rules.isPlacementAllowed(stack, block.state(false)));
@@ -57,9 +63,7 @@ public class PlacementRulesTest {
     public void invalidRulesAreReportedAndIgnored() {
         TestMetaBlock block = new TestMetaBlock(false);
         List<String> warnings = new ArrayList<>();
-        PlacementRules rules = compileWithTestBlock(
-                new String[]{null, "", "not a valid id", BLOCK_ID + "@not-a-number"},
-                new String[0], new String[0], false, warnings::add);
+        PlacementRules rules = compileWithTestBlock(new String[]{null, "", "not a valid id", BLOCK_ID + "@not-a-number"}, new String[0], new String[0], false, warnings::add);
 
         assertTrue(rules.isPlacementAllowed(stackFor(block), block.state(false)));
         assertEquals(4, warnings.size());
@@ -68,8 +72,7 @@ public class PlacementRulesTest {
     @Test
     public void propertyWhitelistIsTrimmedCaseInsensitiveAndSubstringBased() {
         List<String> warnings = new ArrayList<>();
-        PlacementRules rules = compileWithTestBlock(
-                new String[0], new String[0], new String[]{"  FACING  ", "", null}, false, warnings::add);
+        PlacementRules rules = compileWithTestBlock(new String[0], new String[0], new String[]{"  FACING  ", "", null}, false, warnings::add);
 
         assertTrue(rules.isPropertyCopyAllowed(PropertyBool.create("north_facing")));
         assertFalse(rules.isPropertyCopyAllowed(PropertyBool.create("powered")));
@@ -81,10 +84,10 @@ public class PlacementRulesTest {
     public void tileEntityPlacementRequiresExplicitOptIn() {
         TestMetaBlock tileBlock = new TestMetaBlock(true);
         ItemStack stack = stackFor(tileBlock);
-        PlacementRules denied = compileWithTestBlock(
-                new String[0], new String[0], new String[0], false, ignored -> { });
-        PlacementRules allowed = compileWithTestBlock(
-                new String[0], new String[0], new String[0], true, ignored -> { });
+        PlacementRules denied = compileWithTestBlock(new String[0], new String[0], new String[0], false, ignored -> {
+        });
+        PlacementRules allowed = compileWithTestBlock(new String[0], new String[0], new String[0], true, ignored -> {
+        });
 
         assertFalse(denied.isPlacementAllowed(stack, tileBlock.state(false)));
         assertTrue(allowed.isPlacementAllowed(stack, tileBlock.state(false)));
@@ -94,8 +97,8 @@ public class PlacementRulesTest {
     public void compiledRulesDoNotTrackLaterArrayMutation() {
         TestMetaBlock block = new TestMetaBlock(false);
         String[] whitelist = {BLOCK_ID};
-        PlacementRules rules = compileWithTestBlock(
-                whitelist, new String[0], new String[0], false, ignored -> { });
+        PlacementRules rules = compileWithTestBlock(whitelist, new String[0], new String[0], false, ignored -> {
+        });
         whitelist[0] = "test:other";
 
         assertTrue(rules.isPlacementAllowed(stackFor(block), block.state(false)));
@@ -105,8 +108,7 @@ public class PlacementRulesTest {
     public void unknownRegisteredBlockIdIsReportedWithRawValueAndIgnored() {
         TestMetaBlock block = new TestMetaBlock(false);
         List<String> warnings = new ArrayList<>();
-        PlacementRules rules = PlacementRules.compile(
-                new String[]{"typo:missing_block"}, new String[0], new String[0], false, warnings::add);
+        PlacementRules rules = PlacementRules.compile(new String[]{"typo:missing_block"}, new String[0], new String[0], false, warnings::add);
 
         assertTrue(rules.isPlacementAllowed(stackFor(block), block.state(false)));
         assertEquals(1, warnings.size());
@@ -116,22 +118,9 @@ public class PlacementRulesTest {
     @Test
     public void registeredAirIdIsAcceptedWithoutWarning() {
         List<String> warnings = new ArrayList<>();
-        PlacementRules.compile(
-                new String[]{"minecraft:air"}, new String[0], new String[0], false, warnings::add);
+        PlacementRules.compile(new String[]{"minecraft:air"}, new String[0], new String[0], false, warnings::add);
 
         assertTrue(warnings.isEmpty());
-    }
-
-    private static PlacementRules compileWithTestBlock(String[] whitelist, String[] blacklist,
-                                                       String[] propertyKeywords, boolean allowTileEntities,
-                                                       Consumer<String> warningSink) {
-        return PlacementRules.compile(whitelist, blacklist, propertyKeywords, allowTileEntities,
-                warningSink, id -> BLOCK_ID.equals(id.toString()));
-    }
-
-    private static ItemStack stackFor(Block block) {
-        Item item = new ItemBlock(block).setRegistryName(new ResourceLocation("test", "rule_block_item"));
-        return new ItemStack(item);
     }
 
     private static final class TestMetaBlock extends Block {

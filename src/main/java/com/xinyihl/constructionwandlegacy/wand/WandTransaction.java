@@ -6,13 +6,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-/** Successful operation records in execution order, with retryable recovery state. */
+/**
+ * Successful operation records in execution order, with retryable recovery state.
+ */
 public final class WandTransaction {
     private final int dimension;
     private final List<Entry> entries;
@@ -26,6 +24,10 @@ public final class WandTransaction {
             transactionPositions.add(entry.change.getPos());
         }
         this.positions = Collections.unmodifiableSet(transactionPositions);
+    }
+
+    public static Builder builder(int dimension) {
+        return new Builder(dimension);
     }
 
     public int getDimension() {
@@ -49,7 +51,9 @@ public final class WandTransaction {
         return true;
     }
 
-    /** Recovers all entries in reverse order without exposing receipts or entry mutators. */
+    /**
+     * Recovers all entries in reverse order without exposing receipts or entry mutators.
+     */
     public RecoveryResult recover(World world, EntityPlayer player) {
         boolean changed = false;
         boolean complete = true;
@@ -65,10 +69,6 @@ public final class WandTransaction {
             }
         }
         return RecoveryResult.aggregate(changed, complete, firstFailure);
-    }
-
-    public static Builder builder(int dimension) {
-        return new Builder(dimension);
     }
 
     static final class Entry {
@@ -102,8 +102,7 @@ public final class WandTransaction {
                 try {
                     restoreResult = change.restore(world, player);
                 } catch (RuntimeException exception) {
-                    restoreResult = WandOperation.RollbackResult.failed(
-                            "exception restoring transaction entry", exception);
+                    restoreResult = WandOperation.RollbackResult.failed("exception restoring transaction entry", exception);
                 }
                 if (!restoreResult.isRestored()) {
                     return RecoveryResult.incomplete(false, false, restoreResult);
@@ -117,12 +116,10 @@ public final class WandTransaction {
                     materialReceipt.refund();
                     materialRefunded = materialReceipt.getRemainingCount() == 0;
                 } catch (RuntimeException exception) {
-                    return RecoveryResult.incomplete(restoredThisAttempt, false,
-                            WandOperation.RollbackResult.failed("exception refunding transaction entry", exception));
+                    return RecoveryResult.incomplete(restoredThisAttempt, false, WandOperation.RollbackResult.failed("exception refunding transaction entry", exception));
                 }
                 if (!materialRefunded) {
-                    return RecoveryResult.incomplete(restoredThisAttempt, false,
-                            WandOperation.RollbackResult.notRestored("material refund has remaining items"));
+                    return RecoveryResult.incomplete(restoredThisAttempt, false, WandOperation.RollbackResult.notRestored("material refund has remaining items"));
                 }
             }
             return RecoveryResult.complete(restoredThisAttempt);
@@ -136,8 +133,7 @@ public final class WandTransaction {
         @Nullable
         private final WandOperation.RollbackResult failure;
 
-        private RecoveryResult(boolean worldChanged, boolean materialRefunded,
-                               @Nullable WandOperation.RollbackResult failure) {
+        private RecoveryResult(boolean worldChanged, boolean materialRefunded, @Nullable WandOperation.RollbackResult failure) {
             this.worldChanged = worldChanged;
             this.materialRefunded = materialRefunded;
             this.failure = failure;
@@ -147,13 +143,11 @@ public final class WandTransaction {
             return new RecoveryResult(worldChanged, true, null);
         }
 
-        private static RecoveryResult aggregate(boolean worldChanged, boolean complete,
-                                                @Nullable WandOperation.RollbackResult failure) {
+        private static RecoveryResult aggregate(boolean worldChanged, boolean complete, @Nullable WandOperation.RollbackResult failure) {
             return new RecoveryResult(worldChanged, complete, failure);
         }
 
-        private static RecoveryResult incomplete(boolean worldChanged, boolean materialRefunded,
-                                                 WandOperation.RollbackResult failure) {
+        private static RecoveryResult incomplete(boolean worldChanged, boolean materialRefunded, WandOperation.RollbackResult failure) {
             return new RecoveryResult(worldChanged, materialRefunded, failure);
         }
 

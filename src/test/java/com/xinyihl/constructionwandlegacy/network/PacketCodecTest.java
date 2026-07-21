@@ -13,17 +13,21 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class PacketCodecTest {
+    private static <T extends net.minecraftforge.fml.common.network.simpleimpl.IMessage> T roundTrip(T encoded, T decoded) {
+        ByteBuf buffer = Unpooled.buffer();
+        encoded.toBytes(buffer);
+        decoded.fromBytes(buffer);
+        assertFalse(buffer.isReadable());
+        return decoded;
+    }
+
     @Test
     public void channelAndDiscriminatorsAreStableAndUnique() {
         assertEquals("xcwl", ModMessages.CHANNEL_NAME);
-        java.util.Set<Integer> ids = new java.util.HashSet<>(Arrays.asList(
-                ModMessages.ID_UNDO_BLOCKS, ModMessages.ID_QUERY_UNDO,
-                ModMessages.ID_WAND_OPTION, ModMessages.ID_SERVER_RULES));
+        java.util.Set<Integer> ids = new java.util.HashSet<>(Arrays.asList(ModMessages.ID_UNDO_BLOCKS, ModMessages.ID_QUERY_UNDO, ModMessages.ID_WAND_OPTION, ModMessages.ID_SERVER_RULES));
         assertEquals(4, ids.size());
         assertEquals(2, NetworkProtocol.VERSION);
     }
@@ -31,10 +35,7 @@ public class PacketCodecTest {
     @Test
     public void wandOptionRoundTripsStableIdsHandSlotAndBoundedValue() {
         for (WandOption option : WandOption.values()) {
-            PacketWandOption decoded = roundTrip(
-                    new PacketWandOption(option,
-                            new WandTarget(EnumHand.OFF_HAND, WandTarget.OFFHAND_SLOT), 1, true),
-                    new PacketWandOption());
+            PacketWandOption decoded = roundTrip(new PacketWandOption(option, new WandTarget(EnumHand.OFF_HAND, WandTarget.OFFHAND_SLOT), 1, true), new PacketWandOption());
             assertTrue(decoded.isValid());
             assertEquals(option, decoded.getOption());
             assertEquals(EnumHand.OFF_HAND, decoded.getHand());
@@ -66,8 +67,7 @@ public class PacketCodecTest {
 
     @Test
     public void undoPacketIsImmutableAndRejectsOversizedCounts() {
-        LinkedHashSet<BlockPos> source = new LinkedHashSet<>(Arrays.asList(
-                BlockPos.ORIGIN, new BlockPos(1, 2, 3)));
+        LinkedHashSet<BlockPos> source = new LinkedHashSet<>(Arrays.asList(BlockPos.ORIGIN, new BlockPos(1, 2, 3)));
         PacketUndoBlocks decoded = roundTrip(new PacketUndoBlocks(source), new PacketUndoBlocks());
         source.clear();
 
@@ -90,16 +90,12 @@ public class PacketCodecTest {
 
     @Test
     public void serverRulesRoundTripAndRejectOversizedStrings() {
-        RuleSnapshot rules = RuleSnapshot.create(7L, 10, 20, 30, 40, true,
-                Collections.singletonList("minecraft:stone"), Collections.emptyList(),
-                Collections.singletonList("facing"),
-                Collections.singletonList("minecraft:stone;minecraft:cobblestone"));
+        RuleSnapshot rules = RuleSnapshot.create(7L, 10, 20, 30, 40, true, Collections.singletonList("minecraft:stone"), Collections.emptyList(), Collections.singletonList("facing"), Collections.singletonList("minecraft:stone;minecraft:cobblestone"));
         PacketServerRules decoded = roundTrip(new PacketServerRules(rules), new PacketServerRules());
 
         assertTrue(decoded.isValid());
         assertEquals(7L, decoded.getRules().getRevision());
-        assertEquals(Collections.singletonList("minecraft:stone"),
-                decoded.getRules().getPlacementWhitelist());
+        assertEquals(Collections.singletonList("minecraft:stone"), decoded.getRules().getPlacementWhitelist());
 
         ByteBuf malformed = Unpooled.buffer();
         NetworkProtocol.writeHeader(malformed);
@@ -111,14 +107,5 @@ public class PacketCodecTest {
         PacketServerRules invalid = new PacketServerRules();
         invalid.fromBytes(malformed);
         assertFalse(invalid.isValid());
-    }
-
-    private static <T extends net.minecraftforge.fml.common.network.simpleimpl.IMessage> T roundTrip(
-            T encoded, T decoded) {
-        ByteBuf buffer = Unpooled.buffer();
-        encoded.toBytes(buffer);
-        decoded.fromBytes(buffer);
-        assertFalse(buffer.isReadable());
-        return decoded;
     }
 }

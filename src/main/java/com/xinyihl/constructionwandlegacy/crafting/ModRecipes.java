@@ -20,68 +20,24 @@ public final class ModRecipes {
 
     @SubscribeEvent
     public static void onRegisterRecipes(RegistryEvent.Register<IRecipe> event) {
-        registerShapedRecipe(event, "stone_wand", new ItemStack(ModItems.WAND_STONE),
-                "  M",
-                " S ",
-                "S  ",
-                'M', Blocks.COBBLESTONE,
-                'S', Items.STICK);
+        registerShapedRecipe(event, "stone_wand", new ItemStack(ModItems.WAND_STONE), "  M", " S ", "S  ", 'M', Blocks.COBBLESTONE, 'S', Items.STICK);
 
-        registerShapedRecipe(event, "iron_wand", new ItemStack(ModItems.WAND_IRON),
-                "  M",
-                " S ",
-                "S  ",
-                'M', Items.IRON_INGOT,
-                'S', Items.STICK);
+        registerShapedRecipe(event, "iron_wand", new ItemStack(ModItems.WAND_IRON), "  M", " S ", "S  ", 'M', Items.IRON_INGOT, 'S', Items.STICK);
 
-        registerShapedRecipe(event, "diamond_wand", new ItemStack(ModItems.WAND_DIAMOND),
-                "  M",
-                " S ",
-                "S  ",
-                'M', Items.DIAMOND,
-                'S', Items.STICK);
+        registerShapedRecipe(event, "diamond_wand", new ItemStack(ModItems.WAND_DIAMOND), "  M", " S ", "S  ", 'M', Items.DIAMOND, 'S', Items.STICK);
 
-        registerShapedRecipe(event, "infinity_wand", new ItemStack(ModItems.WAND_INFINITY),
-                "  M",
-                " S ",
-                "S  ",
-                'M', Items.NETHER_STAR,
-                'S', Items.STICK);
+        registerShapedRecipe(event, "infinity_wand", new ItemStack(ModItems.WAND_INFINITY), "  M", " S ", "S  ", 'M', Items.NETHER_STAR, 'S', Items.STICK);
 
-        registerShapedRecipe(event, "core_angel", new ItemStack(ModItems.CORE_ANGEL),
-                " PG",
-                "PFP",
-                "GP ",
-                'P', "paneGlass",
-                'G', Items.GOLD_INGOT,
-                'F', Items.FEATHER);
+        registerShapedRecipe(event, "core_angel", new ItemStack(ModItems.CORE_ANGEL), " PG", "PFP", "GP ", 'P', "paneGlass", 'G', Items.GOLD_INGOT, 'F', Items.FEATHER);
 
-        registerShapedRecipe(event, "core_destruction", new ItemStack(ModItems.CORE_DESTRUCTION),
-                " Pp",
-                "PDP",
-                "pP ",
-                'P', "paneGlass",
-                'D', Blocks.DIAMOND_BLOCK,
-                'p', Items.DIAMOND_PICKAXE);
+        registerShapedRecipe(event, "core_destruction", new ItemStack(ModItems.CORE_DESTRUCTION), " Pp", "PDP", "pP ", 'P', "paneGlass", 'D', Blocks.DIAMOND_BLOCK, 'p', Items.DIAMOND_PICKAXE);
 
         if (ModItems.isProjectECoreEnabled()) {
-            registerShapedRecipe(event, "core_projecte", new ItemStack(ModItems.CORE_PROJECTE),
-                    " PG",
-                    "PEP",
-                    "GP ",
-                    'P', "paneGlass",
-                    'G', Items.GLOWSTONE_DUST,
-                    'E', Items.EMERALD);
+            registerShapedRecipe(event, "core_projecte", new ItemStack(ModItems.CORE_PROJECTE), " PG", "PEP", "GP ", 'P', "paneGlass", 'G', Items.GLOWSTONE_DUST, 'E', Items.EMERALD);
         }
 
         if (ModItems.isAE2CoreEnabled()) {
-            registerShapedRecipe(event, "core_ae", new ItemStack(ModItems.CORE_AE),
-                    " PG",
-                    "PCP",
-                    "GP ",
-                    'P', "paneGlass",
-                    'G', Items.QUARTZ,
-                    'C', "chest");
+            registerShapedRecipe(event, "core_ae", new ItemStack(ModItems.CORE_AE), " PG", "PCP", "GP ", 'P', "paneGlass", 'G', Items.QUARTZ, 'C', "chest");
         }
 
         event.getRegistry().register(new RecipeWandUpgrade().setRegistryName(ConstructionWandLegacy.loc("wand_upgrade")));

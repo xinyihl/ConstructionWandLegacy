@@ -8,16 +8,9 @@ import net.minecraft.util.ResourceLocation;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class MaterialSessionTest {
     private final Item item = new Item().setRegistryName(new ResourceLocation("test", "session_material"));
@@ -30,9 +23,7 @@ public class MaterialSessionTest {
     @Test
     public void aggregatesDuplicateStacksAndEnumeratesEachSourceOnce() {
         MaterialKey key = MaterialKey.of(new ItemStack(item, 1, 0));
-        FakeSource first = new FakeSource("first")
-                .entry(key, 32)
-                .entry(key, 16);
+        FakeSource first = new FakeSource("first").entry(key, 32).entry(key, 16);
         FakeSource second = new FakeSource("second").entry(key, 7);
 
         MaterialSession session = new MaterialSession(Arrays.asList(first, second));
@@ -55,12 +46,9 @@ public class MaterialSessionTest {
         blue.setString("variant", "blue");
         MaterialKey redKey = MaterialKey.of(stack(1, red));
         MaterialKey blueKey = MaterialKey.of(stack(1, blue));
-        FakeSource source = new FakeSource("source")
-                .entry(redKey, Long.MAX_VALUE)
-                .entry(redKey, 10)
-                .entry(blueKey, 4);
+        FakeSource source = new FakeSource("source").entry(redKey, Long.MAX_VALUE).entry(redKey, 10).entry(blueKey, 4);
 
-        MaterialSession session = new MaterialSession(Arrays.asList(source));
+        MaterialSession session = new MaterialSession(Collections.singletonList(source));
 
         assertEquals(Integer.MAX_VALUE, session.available(redKey));
         assertEquals(4, session.available(blueKey));
@@ -90,7 +78,7 @@ public class MaterialSessionTest {
         assertEquals(0, first.actual(key));
         assertEquals(0, second.actual(key));
 
-        assertEquals(true, receipt.refund());
+        assertTrue(receipt.refund());
         assertEquals(1, first.actual(key));
         assertEquals(2, second.actual(key));
         assertFalse(receipt.refund());
@@ -102,7 +90,7 @@ public class MaterialSessionTest {
     public void partialRealExtractionRollsBackAndFailsCommit() {
         MaterialKey key = MaterialKey.of(new ItemStack(item, 1, 0));
         FakeSource source = new FakeSource("changing").entry(key, 2);
-        MaterialSession session = new MaterialSession(Arrays.asList(source));
+        MaterialSession session = new MaterialSession(Collections.singletonList(source));
         MaterialReservation reservation = session.reserve(key, 2);
         source.setActual(key, 1);
 
@@ -114,7 +102,7 @@ public class MaterialSessionTest {
     @Test
     public void insufficientRequestDoesNotFreezeAnyAmount() {
         MaterialKey key = MaterialKey.of(new ItemStack(item, 1, 0));
-        MaterialSession session = new MaterialSession(Arrays.asList(new FakeSource("source").entry(key, 2)));
+        MaterialSession session = new MaterialSession(Collections.singletonList(new FakeSource("source").entry(key, 2)));
 
         assertNull(session.reserve(key, 3));
         assertEquals(2, session.available(key));
@@ -125,7 +113,7 @@ public class MaterialSessionTest {
         MaterialKey catalogKey = MaterialKey.of(new ItemStack(item, 1, 0));
         MaterialKey absentKey = MaterialKey.of(new ItemStack(item, 1, 1));
         FakeSource unlimitedSource = new FakeSource("unlimited").entry(catalogKey, 2);
-        MaterialSession unlimited = MaterialSession.creativeUnlimited(Arrays.asList(unlimitedSource));
+        MaterialSession unlimited = MaterialSession.creativeUnlimited(Collections.singletonList(unlimitedSource));
 
         assertEquals(Integer.MAX_VALUE, unlimited.available(absentKey));
         assertEquals(1, unlimited.keysForItem(item).size());
@@ -133,7 +121,7 @@ public class MaterialSessionTest {
         assertEquals(2, unlimitedSource.actual(catalogKey));
 
         FakeSource catalogSource = new FakeSource("catalog").entry(catalogKey, 2);
-        MaterialSession catalog = MaterialSession.creativeCatalog(Arrays.asList(catalogSource));
+        MaterialSession catalog = MaterialSession.creativeCatalog(Collections.singletonList(catalogSource));
         MaterialReservation reservation = catalog.reserve(catalogKey, 2);
         assertNotNull(reservation);
         assertNotNull(reservation.commit());
@@ -190,11 +178,10 @@ public class MaterialSessionTest {
             int available = actual(key);
             int extracted = Math.min(available, count);
             actual.put(key, available - extracted);
-            return MaterialReceipt.of(id, key, extracted,
-                    (refundKey, refundCount) -> {
-                        actual.put(refundKey, SaturatedAmounts.add(actual(refundKey), refundCount));
-                        return 0;
-                    });
+            return MaterialReceipt.of(id, key, extracted, (refundKey, refundCount) -> {
+                actual.put(refundKey, SaturatedAmounts.add(actual(refundKey), refundCount));
+                return 0;
+            });
         }
     }
 

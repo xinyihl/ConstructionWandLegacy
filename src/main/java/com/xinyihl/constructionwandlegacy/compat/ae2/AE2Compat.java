@@ -52,8 +52,7 @@ public final class AE2Compat {
         if (position.length < 3 || !data.hasKey(TAG_BOUND_DIM)) {
             return null;
         }
-        return new Binding(new BlockPos(position[0], position[1], position[2]),
-                data.getInteger(TAG_BOUND_DIM));
+        return new Binding(new BlockPos(position[0], position[1], position[2]), data.getInteger(TAG_BOUND_DIM));
     }
 
     static final class Binding {
@@ -75,7 +74,6 @@ public final class AE2Compat {
     }
 
     private static final class FactoryHolder {
-        private static final MaterialSourceFactory MATERIAL_SOURCE_FACTORY =
-                new AE2MaterialSourceFactory();
+        private static final MaterialSourceFactory MATERIAL_SOURCE_FACTORY = new AE2MaterialSourceFactory();
     }
 }

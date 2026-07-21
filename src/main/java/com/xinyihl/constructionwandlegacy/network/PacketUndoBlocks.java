@@ -26,6 +26,10 @@ public class PacketUndoBlocks implements IMessage {
         this.valid = true;
     }
 
+    private static Set<BlockPos> immutableCopy(Set<BlockPos> blocks) {
+        return Collections.unmodifiableSet(new LinkedHashSet<>(blocks));
+    }
+
     @Override
     public void fromBytes(ByteBuf buf) {
         valid = false;
@@ -68,10 +72,6 @@ public class PacketUndoBlocks implements IMessage {
 
     public Set<BlockPos> getUndoBlocks() {
         return undoBlocks;
-    }
-
-    private static Set<BlockPos> immutableCopy(Set<BlockPos> blocks) {
-        return Collections.unmodifiableSet(new LinkedHashSet<>(blocks));
     }
 
     public static class Handler implements IMessageHandler<PacketUndoBlocks, IMessage> {

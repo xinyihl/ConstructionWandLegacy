@@ -34,15 +34,12 @@ public final class ActionDestruction implements WandAction {
         EnumFacing breakFace = hit.sideHit;
         BlockPos startingPoint = hit.getBlockPos();
         IBlockState targetBlock = context.getWorld().getBlockState(startingPoint);
-        return PlaneTraversal.traverse(startingPoint, breakFace, context.getState().getLock(), limit,
-                candidate -> {
-                    if (!WandUtil.isBlockPermeable(context.getWorld(), candidate.offset(breakFace))) {
-                        return null;
-                    }
-                    IBlockState candidateBlock = context.getWorld().getBlockState(candidate);
-                    return context.matchesBlocks(targetBlock, candidateBlock)
-                            ? resolver.createDestruction(candidate)
-                            : null;
-                });
+        return PlaneTraversal.traverse(startingPoint, breakFace, context.getState().getLock(), limit, candidate -> {
+            if (!WandUtil.isBlockPermeable(context.getWorld(), candidate.offset(breakFace))) {
+                return null;
+            }
+            IBlockState candidateBlock = context.getWorld().getBlockState(candidate);
+            return context.matchesBlocks(targetBlock, candidateBlock) ? resolver.createDestruction(candidate) : null;
+        });
     }
 }

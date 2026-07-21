@@ -25,6 +25,31 @@ public class PacketServerRules implements IMessage {
         this.valid = true;
     }
 
+    private static List<String> readRules(ByteBuf buf) {
+        if (buf.readableBytes() < 2) {
+            throw new IllegalArgumentException("Missing rule count");
+        }
+        int count = buf.readUnsignedShort();
+        if (count > RuleSnapshot.MAX_RULE_ENTRIES) {
+            throw new IllegalArgumentException("Rule count is out of bounds");
+        }
+        ArrayList<String> result = new ArrayList<>(count);
+        for (int index = 0; index < count; index++) {
+            result.add(NetworkProtocol.readBoundedString(buf, RuleSnapshot.MAX_RULE_BYTES));
+        }
+        return result;
+    }
+
+    private static void writeRules(ByteBuf buf, List<String> values) {
+        if (values.size() > RuleSnapshot.MAX_RULE_ENTRIES) {
+            throw new IllegalArgumentException("Rule count is out of bounds");
+        }
+        buf.writeShort(values.size());
+        for (String value : values) {
+            NetworkProtocol.writeBoundedString(buf, value, RuleSnapshot.MAX_RULE_BYTES);
+        }
+    }
+
     @Override
     public void fromBytes(ByteBuf buf) {
         valid = false;
@@ -53,8 +78,7 @@ public class PacketServerRules implements IMessage {
             if (buf.isReadable()) {
                 return;
             }
-            rules = RuleSnapshot.create(revision, stone, iron, diamond, infinity,
-                    allowTileEntities, whitelist, blacklist, properties, similar);
+            rules = RuleSnapshot.create(revision, stone, iron, diamond, infinity, allowTileEntities, whitelist, blacklist, properties, similar);
             valid = true;
         } catch (IndexOutOfBoundsException | IllegalArgumentException ignored) {
             rules = null;
@@ -78,31 +102,6 @@ public class PacketServerRules implements IMessage {
         writeRules(buf, rules.getPlacementBlacklist());
         writeRules(buf, rules.getPropertyCopyWhitelist());
         writeRules(buf, rules.getSimilarBlocks());
-    }
-
-    private static List<String> readRules(ByteBuf buf) {
-        if (buf.readableBytes() < 2) {
-            throw new IllegalArgumentException("Missing rule count");
-        }
-        int count = buf.readUnsignedShort();
-        if (count > RuleSnapshot.MAX_RULE_ENTRIES) {
-            throw new IllegalArgumentException("Rule count is out of bounds");
-        }
-        ArrayList<String> result = new ArrayList<>(count);
-        for (int index = 0; index < count; index++) {
-            result.add(NetworkProtocol.readBoundedString(buf, RuleSnapshot.MAX_RULE_BYTES));
-        }
-        return result;
-    }
-
-    private static void writeRules(ByteBuf buf, List<String> values) {
-        if (values.size() > RuleSnapshot.MAX_RULE_ENTRIES) {
-            throw new IllegalArgumentException("Rule count is out of bounds");
-        }
-        buf.writeShort(values.size());
-        for (String value : values) {
-            NetworkProtocol.writeBoundedString(buf, value, RuleSnapshot.MAX_RULE_BYTES);
-        }
     }
 
     public boolean isValid() {

@@ -61,8 +61,7 @@ public class PacketQueryUndo implements IMessage {
                 return null;
             }
             EntityPlayerMP player = ctx.getServerHandler().player;
-            player.getServerWorld().addScheduledTask(() -> ConstructionWandLegacy.instance
-                    .getRuntime().getUndoService().updateClient(player, message.undoPressed));
+            player.getServerWorld().addScheduledTask(() -> ConstructionWandLegacy.instance.getRuntime().getUndoService().updateClient(player, message.undoPressed));
             return null;
         }
     }

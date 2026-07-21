@@ -14,15 +14,11 @@ import net.minecraft.util.math.Vec3d;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-/** Immutable identity for one client-side preview calculation. */
+/**
+ * Immutable identity for one client-side preview calculation.
+ */
 public final class PreviewKey {
     private static final Item TEST_ITEM = new Item();
-    public enum Mode {
-        BLOCK,
-        AIR,
-        UNDO
-    }
-
     private final Mode mode;
     private final int dimension;
     private final long worldTick;
@@ -42,14 +38,7 @@ public final class PreviewKey {
     private final NBTTagCompound wandTag;
     private final String stateSignature;
     private final long rulesRevision;
-
-    private PreviewKey(Mode mode, int dimension, long worldTick,
-                       double playerX, double playerY, double playerZ,
-                       double lookX, double lookY, double lookZ,
-                       BlockPos targetPos, @Nullable EnumFacing targetSide,
-                       EnumHand hand, int slot, Item wandItem, int wandDamage,
-                       @Nullable NBTTagCompound wandTag, String stateSignature,
-                       long rulesRevision) {
+    private PreviewKey(Mode mode, int dimension, long worldTick, double playerX, double playerY, double playerZ, double lookX, double lookY, double lookZ, BlockPos targetPos, @Nullable EnumFacing targetSide, EnumHand hand, int slot, Item wandItem, int wandDamage, @Nullable NBTTagCompound wandTag, String stateSignature, long rulesRevision) {
         this.mode = Objects.requireNonNull(mode, "mode");
         this.dimension = dimension;
         this.worldTick = worldTick;
@@ -70,30 +59,17 @@ public final class PreviewKey {
         this.rulesRevision = rulesRevision;
     }
 
-    public static PreviewKey create(Mode mode, int dimension, long worldTick,
-                                    double playerX, double playerY, double playerZ,
-                                    Vec3d look, BlockPos targetPos,
-                                    @Nullable EnumFacing targetSide, WandTarget target,
-                                    ItemStack wand, WandState state, long rulesRevision) {
-        return new PreviewKey(mode, dimension, worldTick, playerX, playerY, playerZ,
-                look.x, look.y, look.z, targetPos, targetSide,
-                target.getHand(), target.getSlot(), wand.getItem(), wand.getItemDamage(),
-                wand.getTagCompound(), stateSignature(state), rulesRevision);
+    public static PreviewKey create(Mode mode, int dimension, long worldTick, double playerX, double playerY, double playerZ, Vec3d look, BlockPos targetPos, @Nullable EnumFacing targetSide, WandTarget target, ItemStack wand, WandState state, long rulesRevision) {
+        return new PreviewKey(mode, dimension, worldTick, playerX, playerY, playerZ, look.x, look.y, look.z, targetPos, targetSide, target.getHand(), target.getSlot(), wand.getItem(), wand.getItemDamage(), wand.getTagCompound(), stateSignature(state), rulesRevision);
     }
 
-    static PreviewKey forTest(Mode mode, long worldTick, double playerX, double lookX,
-                              long targetPos, String stateSignature, long rulesRevision) {
-        return new PreviewKey(mode, 0, worldTick, playerX, 0.0D, 0.0D,
-                lookX, 0.0D, 0.0D, BlockPos.fromLong(targetPos), EnumFacing.UP,
-                EnumHand.MAIN_HAND, 0, TEST_ITEM, 0,
-                null, stateSignature, rulesRevision);
+    static PreviewKey forTest(Mode mode, long worldTick, double playerX, double lookX, long targetPos, String stateSignature, long rulesRevision) {
+        return new PreviewKey(mode, 0, worldTick, playerX, 0.0D, 0.0D, lookX, 0.0D, 0.0D, BlockPos.fromLong(targetPos), EnumFacing.UP, EnumHand.MAIN_HAND, 0, TEST_ITEM, 0, null, stateSignature, rulesRevision);
     }
 
     private static String stateSignature(WandState state) {
         ResourceLocation core = state.getSelectedCore().getRegistryName();
-        return String.valueOf(core) + '|' + state.getSelectedCoreIndex() + '|'
-                + state.getLock().name() + '|' + state.getDirection().name() + '|'
-                + state.isReplace() + '|' + state.getMatch().name() + '|' + state.isRandom();
+        return String.valueOf(core) + '|' + state.getSelectedCoreIndex() + '|' + state.getLock().name() + '|' + state.getDirection().name() + '|' + state.isReplace() + '|' + state.getMatch().name() + '|' + state.isRandom();
     }
 
     public Mode getMode() {
@@ -101,8 +77,7 @@ public final class PreviewKey {
     }
 
     public boolean matchesBlock(BlockPos pos, EnumFacing side) {
-        return (mode == Mode.BLOCK || mode == Mode.UNDO) && targetPos == pos.toLong()
-                && targetSide == (side == null ? -1 : side.getIndex());
+        return (mode == Mode.BLOCK || mode == Mode.UNDO) && targetPos == pos.toLong() && targetSide == (side == null ? -1 : side.getIndex());
     }
 
     @Override
@@ -114,21 +89,15 @@ public final class PreviewKey {
             return false;
         }
         PreviewKey that = (PreviewKey) other;
-        return dimension == that.dimension && worldTick == that.worldTick
-                && playerX == that.playerX && playerY == that.playerY && playerZ == that.playerZ
-                && lookX == that.lookX && lookY == that.lookY && lookZ == that.lookZ
-                && targetPos == that.targetPos && targetSide == that.targetSide
-                && slot == that.slot && wandItem == that.wandItem && wandDamage == that.wandDamage
-                && rulesRevision == that.rulesRevision && mode == that.mode && hand == that.hand
-                && Objects.equals(wandTag, that.wandTag)
-                && stateSignature.equals(that.stateSignature);
+        return dimension == that.dimension && worldTick == that.worldTick && playerX == that.playerX && playerY == that.playerY && playerZ == that.playerZ && lookX == that.lookX && lookY == that.lookY && lookZ == that.lookZ && targetPos == that.targetPos && targetSide == that.targetSide && slot == that.slot && wandItem == that.wandItem && wandDamage == that.wandDamage && rulesRevision == that.rulesRevision && mode == that.mode && hand == that.hand && Objects.equals(wandTag, that.wandTag) && stateSignature.equals(that.stateSignature);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mode, dimension, worldTick, playerX, playerY, playerZ,
-                lookX, lookY, lookZ, targetPos, targetSide, hand, slot,
-                System.identityHashCode(wandItem), wandDamage, wandTag,
-                stateSignature, rulesRevision);
+        return Objects.hash(mode, dimension, worldTick, playerX, playerY, playerZ, lookX, lookY, lookZ, targetPos, targetSide, hand, slot, System.identityHashCode(wandItem), wandDamage, wandTag, stateSignature, rulesRevision);
+    }
+
+    public enum Mode {
+        BLOCK, AIR, UNDO
     }
 }

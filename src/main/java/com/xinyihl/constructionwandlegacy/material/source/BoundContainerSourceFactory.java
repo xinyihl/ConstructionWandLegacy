@@ -1,11 +1,7 @@
 package com.xinyihl.constructionwandlegacy.material.source;
 
 import com.xinyihl.constructionwandlegacy.basics.option.WandDataCodec;
-import com.xinyihl.constructionwandlegacy.material.MaterialCollector;
-import com.xinyihl.constructionwandlegacy.material.MaterialKey;
-import com.xinyihl.constructionwandlegacy.material.MaterialReceipt;
-import com.xinyihl.constructionwandlegacy.material.MaterialSource;
-import com.xinyihl.constructionwandlegacy.material.MaterialSourceFactory;
+import com.xinyihl.constructionwandlegacy.material.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -72,8 +68,7 @@ public final class BoundContainerSourceFactory implements MaterialSourceFactory 
         private final IItemHandler handler;
         private final Map<MaterialKey, List<Integer>> slotsByKey = new LinkedHashMap<>();
 
-        private BoundContainerSource(EntityPlayer player, World world, BlockPos pos,
-                                     TileEntity tile, IItemHandler handler) {
+        private BoundContainerSource(EntityPlayer player, World world, BlockPos pos, TileEntity tile, IItemHandler handler) {
             this.player = player;
             this.world = world;
             this.pos = pos;
@@ -124,8 +119,7 @@ public final class BoundContainerSourceFactory implements MaterialSourceFactory 
                 if (extracted != null && !extracted.isEmpty()) {
                     int extractedCount = Math.min(remaining, extracted.getCount());
                     remaining -= extractedCount;
-                    receipts.add(MaterialReceipt.of(ID, key, extractedCount,
-                            (refundKey, refundCount) -> refund(refundKey, refundCount)));
+                    receipts.add(MaterialReceipt.of(ID, key, extractedCount, (refundKey, refundCount) -> refund(refundKey, refundCount)));
                 }
                 if (remaining == 0) {
                     break;
@@ -150,16 +144,12 @@ public final class BoundContainerSourceFactory implements MaterialSourceFactory 
                     break;
                 }
             }
-            return remaining.isEmpty()
-                    ? 0
-                    : InventoryRefunds.refund(player, key, remaining.getCount());
+            return remaining.isEmpty() ? 0 : InventoryRefunds.refund(player, key, remaining.getCount());
         }
 
         private boolean isValidEndpoint() {
             try {
-                if (world == null || world.isRemote || !world.isBlockLoaded(pos)
-                        || world.getTileEntity(pos) != tile || tile.isInvalid()
-                        || !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)) {
+                if (world == null || world.isRemote || !world.isBlockLoaded(pos) || world.getTileEntity(pos) != tile || tile.isInvalid() || !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)) {
                     return false;
                 }
                 return tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null) == handler;

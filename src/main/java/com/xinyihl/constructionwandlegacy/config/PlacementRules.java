@@ -9,11 +9,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -21,16 +17,14 @@ import java.util.regex.Pattern;
 public final class PlacementRules {
     private static final Pattern VALID_NAMESPACE = Pattern.compile("[a-z0-9_.-]+");
     private static final Pattern VALID_PATH = Pattern.compile("[a-z0-9/._-]+");
-    private static final PlacementRules EMPTY = new PlacementRules(
-            Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), false);
+    private static final PlacementRules EMPTY = new PlacementRules(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), false);
 
     private final List<BlockRule> placementWhitelist;
     private final List<BlockRule> placementBlacklist;
     private final List<String> propertyCopyWhitelist;
     private final boolean allowTileEntityPlacement;
 
-    private PlacementRules(List<BlockRule> placementWhitelist, List<BlockRule> placementBlacklist,
-                           List<String> propertyCopyWhitelist, boolean allowTileEntityPlacement) {
+    private PlacementRules(List<BlockRule> placementWhitelist, List<BlockRule> placementBlacklist, List<String> propertyCopyWhitelist, boolean allowTileEntityPlacement) {
         this.placementWhitelist = placementWhitelist;
         this.placementBlacklist = placementBlacklist;
         this.propertyCopyWhitelist = propertyCopyWhitelist;
@@ -41,65 +35,25 @@ public final class PlacementRules {
         return EMPTY;
     }
 
-    public static PlacementRules compile(String[] whitelist, String[] blacklist, String[] propertyKeywords,
-                                         boolean allowTileEntities) {
-        return compile(whitelist, blacklist, propertyKeywords, allowTileEntities,
-                ConfigWarnings::warn, ForgeRegistries.BLOCKS::containsKey);
+    public static PlacementRules compile(String[] whitelist, String[] blacklist, String[] propertyKeywords, boolean allowTileEntities) {
+        return compile(whitelist, blacklist, propertyKeywords, allowTileEntities, ConfigWarnings::warn, ForgeRegistries.BLOCKS::containsKey);
     }
 
-    public static PlacementRules compile(String[] whitelist, String[] blacklist, String[] propertyKeywords,
-                                         boolean allowTileEntities, Consumer<String> warningSink) {
-        return compile(whitelist, blacklist, propertyKeywords, allowTileEntities,
-                warningSink, ForgeRegistries.BLOCKS::containsKey);
+    public static PlacementRules compile(String[] whitelist, String[] blacklist, String[] propertyKeywords, boolean allowTileEntities, Consumer<String> warningSink) {
+        return compile(whitelist, blacklist, propertyKeywords, allowTileEntities, warningSink, ForgeRegistries.BLOCKS::containsKey);
     }
 
-    public static PlacementRules compile(String[] whitelist, String[] blacklist, String[] propertyKeywords,
-                                         boolean allowTileEntities, Consumer<String> warningSink,
-                                         Predicate<ResourceLocation> blockExists) {
+    public static PlacementRules compile(String[] whitelist, String[] blacklist, String[] propertyKeywords, boolean allowTileEntities, Consumer<String> warningSink, Predicate<ResourceLocation> blockExists) {
         Objects.requireNonNull(warningSink, "warningSink");
         Objects.requireNonNull(blockExists, "blockExists");
 
-        List<BlockRule> compiledWhitelist = compileBlockRules(
-                whitelist, "placement whitelist", warningSink, blockExists);
-        List<BlockRule> compiledBlacklist = compileBlockRules(
-                blacklist, "placement blacklist", warningSink, blockExists);
+        List<BlockRule> compiledWhitelist = compileBlockRules(whitelist, "placement whitelist", warningSink, blockExists);
+        List<BlockRule> compiledBlacklist = compileBlockRules(blacklist, "placement blacklist", warningSink, blockExists);
         List<String> compiledProperties = compilePropertyRules(propertyKeywords, warningSink);
         return new PlacementRules(compiledWhitelist, compiledBlacklist, compiledProperties, allowTileEntities);
     }
 
-    public boolean isPlacementAllowed(ItemStack placeStack, @Nullable IBlockState placeState) {
-        if (placeStack.isEmpty() || !(placeStack.getItem() instanceof ItemBlock)) {
-            return false;
-        }
-
-        Block block = ((ItemBlock) placeStack.getItem()).getBlock();
-        IBlockState state = placeState != null ? placeState : block.getDefaultState();
-        if (!allowTileEntityPlacement && block.hasTileEntity(state)) {
-            return false;
-        }
-        if (!placementWhitelist.isEmpty() && !matchesAny(placementWhitelist, state)) {
-            return false;
-        }
-        return !matchesAny(placementBlacklist, state);
-    }
-
-    public boolean isPropertyCopyAllowed(@Nullable IProperty<?> property) {
-        if (property == null || propertyCopyWhitelist.isEmpty()) {
-            return false;
-        }
-
-        String name = property.getName().toLowerCase(Locale.ROOT);
-        for (String keyword : propertyCopyWhitelist) {
-            if (name.contains(keyword)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static List<BlockRule> compileBlockRules(String[] entries, String ruleName,
-                                                     Consumer<String> warningSink,
-                                                     Predicate<ResourceLocation> blockExists) {
+    private static List<BlockRule> compileBlockRules(String[] entries, String ruleName, Consumer<String> warningSink, Predicate<ResourceLocation> blockExists) {
         if (entries == null) {
             warn(warningSink, ruleName, null);
             return Collections.emptyList();
@@ -147,7 +101,37 @@ public final class PlacementRules {
     }
 
     private static void warn(Consumer<String> warningSink, String ruleName, @Nullable String raw) {
-        warningSink.accept("Invalid " + ruleName + " config entry (raw value: " + String.valueOf(raw) + ")");
+        warningSink.accept("Invalid " + ruleName + " config entry (raw value: " + raw + ")");
+    }
+
+    public boolean isPlacementAllowed(ItemStack placeStack, @Nullable IBlockState placeState) {
+        if (placeStack.isEmpty() || !(placeStack.getItem() instanceof ItemBlock)) {
+            return false;
+        }
+
+        Block block = ((ItemBlock) placeStack.getItem()).getBlock();
+        IBlockState state = placeState != null ? placeState : block.getDefaultState();
+        if (!allowTileEntityPlacement && block.hasTileEntity(state)) {
+            return false;
+        }
+        if (!placementWhitelist.isEmpty() && !matchesAny(placementWhitelist, state)) {
+            return false;
+        }
+        return !matchesAny(placementBlacklist, state);
+    }
+
+    public boolean isPropertyCopyAllowed(@Nullable IProperty<?> property) {
+        if (property == null || propertyCopyWhitelist.isEmpty()) {
+            return false;
+        }
+
+        String name = property.getName().toLowerCase(Locale.ROOT);
+        for (String keyword : propertyCopyWhitelist) {
+            if (name.contains(keyword)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static final class BlockRule {
@@ -161,8 +145,7 @@ public final class PlacementRules {
         }
 
         @Nullable
-        private static BlockRule parse(@Nullable String raw, String ruleName, Consumer<String> warningSink,
-                                       Predicate<ResourceLocation> blockExists) {
+        private static BlockRule parse(@Nullable String raw, String ruleName, Consumer<String> warningSink, Predicate<ResourceLocation> blockExists) {
             if (raw == null) {
                 warn(warningSink, ruleName, null);
                 return null;
@@ -182,8 +165,7 @@ public final class PlacementRules {
                 warn(warningSink, ruleName, raw);
                 return null;
             }
-            if (!VALID_NAMESPACE.matcher(id.getNamespace()).matches()
-                    || !VALID_PATH.matcher(id.getPath()).matches()) {
+            if (!VALID_NAMESPACE.matcher(id.getNamespace()).matches() || !VALID_PATH.matcher(id.getPath()).matches()) {
                 warn(warningSink, ruleName, raw);
                 return null;
             }

@@ -61,8 +61,7 @@ public class GuiWand extends GuiScreen {
         for (GuiButton button : buttonList) {
             if (button instanceof OptionButton && button.isMouseOver()) {
                 OptionButton optionButton = (OptionButton) button;
-                drawHoveringText(Collections.singletonList(
-                        I18n.format(optionButton.option.getDescriptionTranslation(state))), mouseX, mouseY);
+                drawHoveringText(Collections.singletonList(I18n.format(optionButton.option.getDescriptionTranslation(state))), mouseX, mouseY);
                 break;
             }
         }
@@ -80,8 +79,7 @@ public class GuiWand extends GuiScreen {
         }
         state = WandDataCodec.read(wand);
         optionButton.displayString = getButtonLabel(optionButton.option);
-        ModMessages.sendToServer(new PacketWandOption(optionButton.option, target,
-                WandDataCodec.getNetworkValue(state, optionButton.option), false));
+        ModMessages.sendToServer(new PacketWandOption(optionButton.option, target, WandDataCodec.getNetworkValue(state, optionButton.option), false));
     }
 
     @Override

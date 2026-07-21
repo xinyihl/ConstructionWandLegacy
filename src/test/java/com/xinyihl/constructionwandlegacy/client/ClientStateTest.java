@@ -9,11 +9,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ClientStateTest {
+    private static RuleSnapshot rules(long revision) {
+        return RuleSnapshot.create(revision, 9, 27, 81, 256, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+    }
+
     @Test
     public void undoBlocksAreDefensivelyCopiedAndImmutable() {
         ClientState state = new ClientState();
@@ -46,10 +48,5 @@ public class ClientStateTest {
         assertEquals(Long.MIN_VALUE, state.getServerRulesRevision());
         assertTrue(state.getUndoBlocks().isEmpty());
         assertTrue(state.getPreview().isEmpty());
-    }
-
-    private static RuleSnapshot rules(long revision) {
-        return RuleSnapshot.create(revision, 9, 27, 81, 256, false,
-                new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 }

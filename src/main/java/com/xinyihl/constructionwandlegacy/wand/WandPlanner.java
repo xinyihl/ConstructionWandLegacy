@@ -6,11 +6,7 @@ import com.xinyihl.constructionwandlegacy.basics.pool.IPool;
 import com.xinyihl.constructionwandlegacy.basics.pool.OrderedPool;
 import com.xinyihl.constructionwandlegacy.basics.pool.RandomPool;
 import com.xinyihl.constructionwandlegacy.items.core.CoreDefault;
-import com.xinyihl.constructionwandlegacy.material.MaterialKey;
-import com.xinyihl.constructionwandlegacy.material.MaterialReservation;
-import com.xinyihl.constructionwandlegacy.material.MaterialSession;
-import com.xinyihl.constructionwandlegacy.material.MaterialSourceFactory;
-import com.xinyihl.constructionwandlegacy.material.MaterialSourceRegistry;
+import com.xinyihl.constructionwandlegacy.material.*;
 import com.xinyihl.constructionwandlegacy.wand.action.WandAction;
 import com.xinyihl.constructionwandlegacy.wand.operation.DestroyOperation;
 import com.xinyihl.constructionwandlegacy.wand.operation.PlaceOperation;
@@ -29,12 +25,7 @@ import net.minecraftforge.common.IPlantable;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public final class WandPlanner {
     private final MaterialSourceRegistry materialSources;
@@ -45,55 +36,16 @@ public final class WandPlanner {
         this.logger = logger;
     }
 
-    public WandPlan plan(WandContext context) {
-        WandAction action = context.getState().getSelectedCore().getWandAction();
-        int limit = operationLimit(context, action);
-        if (limit <= 0) {
-            return new WandPlan(java.util.Collections.emptyList());
-        }
-
-        MaterialSourceFactory coreFactory = context.getState().getSelectedCore().getMaterialSourceFactory();
-        MaterialSession session = coreFactory == null
-                ? materialSources.createInventorySession(context.getPlayer(), context.getWand())
-                : materialSources.createSession(context.getPlayer(), context.getWand(), coreFactory);
-
-        Resolver resolver;
-        ItemStack offhand = context.getPlayer().getHeldItemOffhand();
-        if (isPlantingMode(context, offhand)) {
-            resolver = new PlantingResolver(context, session, offhand);
-        } else {
-            boolean random = context.getState().isRandom() && coreFactory == null;
-            resolver = new PlacementResolver(context, session, random, getTargetItem(context));
-        }
-
-        try {
-            List<WandOperation> operations = context.isBlockHit()
-                    ? action.plan(context, resolver, limit)
-                    : action.planFromAir(context, resolver, limit);
-            return new WandPlan(operations, resolver.reservations);
-        } catch (RuntimeException exception) {
-            resolver.cancelReservations();
-            logger.warn("Failed to plan wand operation", exception);
-            return new WandPlan(java.util.Collections.emptyList());
-        }
-    }
-
     private static int operationLimit(WandContext context, WandAction action) {
         if (context.getPlayer().isCreative() && context.getWandItem().getTier() == WandTier.INFINITY) {
             return context.getSpec().getCreativePlacementLimit();
         }
-        return Math.min(context.getWandItem().remainingDurability(context.getWand()),
-                action.getLimit(context));
+        return Math.min(context.getWandItem().remainingDurability(context.getWand()), action.getLimit(context));
     }
 
     private static boolean isPlantingMode(WandContext context, ItemStack offhand) {
         RayTraceResult hit = context.getRayTraceResult();
-        if (!(context.getState().getSelectedCore() instanceof CoreDefault)
-                || hit == null
-                || hit.typeOfHit != RayTraceResult.Type.BLOCK
-                || hit.sideHit != EnumFacing.UP
-                || offhand.isEmpty()
-                || !(offhand.getItem() instanceof IPlantable)) {
+        if (!(context.getState().getSelectedCore() instanceof CoreDefault) || hit == null || hit.typeOfHit != RayTraceResult.Type.BLOCK || hit.sideHit != EnumFacing.UP || offhand.isEmpty() || !(offhand.getItem() instanceof IPlantable)) {
             return false;
         }
 
@@ -103,11 +55,7 @@ public final class WandPlanner {
         BlockPos cropPos = farmlandPos.up();
         IPlantable plantable = (IPlantable) offhand.getItem();
         IBlockState farmland = world.getBlockState(farmlandPos);
-        return world.isAirBlock(cropPos)
-                && world.isBlockModifiable(player, cropPos)
-                && player.canPlayerEdit(cropPos, EnumFacing.UP, offhand)
-                && farmland.getBlock().canSustainPlant(
-                farmland, world, farmlandPos, EnumFacing.UP, plantable);
+        return world.isAirBlock(cropPos) && world.isBlockModifiable(player, cropPos) && player.canPlayerEdit(cropPos, EnumFacing.UP, offhand) && farmland.getBlock().canSustainPlant(farmland, world, farmlandPos, EnumFacing.UP, plantable);
     }
 
     @Nullable
@@ -119,9 +67,36 @@ public final class WandPlanner {
         IBlockState state = context.getWorld().getBlockState(hit.getBlockPos());
         Block block = state.getBlock();
         Item blockItem = Item.getItemFromBlock(block);
-        return blockItem instanceof ItemBlock
-                ? new ItemStack(blockItem, 1, block.damageDropped(state))
-                : null;
+        return blockItem instanceof ItemBlock ? new ItemStack(blockItem, 1, block.damageDropped(state)) : null;
+    }
+
+    public WandPlan plan(WandContext context) {
+        WandAction action = context.getState().getSelectedCore().getWandAction();
+        int limit = operationLimit(context, action);
+        if (limit <= 0) {
+            return new WandPlan(java.util.Collections.emptyList());
+        }
+
+        MaterialSourceFactory coreFactory = context.getState().getSelectedCore().getMaterialSourceFactory();
+        MaterialSession session = coreFactory == null ? materialSources.createInventorySession(context.getPlayer(), context.getWand()) : materialSources.createSession(context.getPlayer(), context.getWand(), coreFactory);
+
+        Resolver resolver;
+        ItemStack offhand = context.getPlayer().getHeldItemOffhand();
+        if (isPlantingMode(context, offhand)) {
+            resolver = new PlantingResolver(context, session, offhand);
+        } else {
+            boolean random = context.getState().isRandom() && coreFactory == null;
+            resolver = new PlacementResolver(context, session, random, getTargetItem(context));
+        }
+
+        try {
+            List<WandOperation> operations = context.isBlockHit() ? action.plan(context, resolver, limit) : action.planFromAir(context, resolver, limit);
+            return new WandPlan(operations, resolver.reservations);
+        } catch (RuntimeException exception) {
+            resolver.cancelReservations();
+            logger.warn("Failed to plan wand operation", exception);
+            return new WandPlan(java.util.Collections.emptyList());
+        }
     }
 
     private abstract class Resolver implements WandAction.OperationResolver {
@@ -174,8 +149,7 @@ public final class WandPlanner {
         private final Set<MaterialKey> trackedKeys = new HashSet<>();
         private final IPool<MaterialKey> itemPool;
 
-        private PlacementResolver(WandContext context, MaterialSession session, boolean random,
-                                  @Nullable ItemStack target) {
+        private PlacementResolver(WandContext context, MaterialSession session, boolean random, @Nullable ItemStack target) {
             super(context, session);
             itemPool = random ? new RandomPool<>(new Random()) : new OrderedPool<>();
             if (random) {
@@ -219,8 +193,7 @@ public final class WandPlanner {
         @Nullable
         @Override
         protected WandOperation planPlacement(BlockPos pos, @Nullable IBlockState supportingBlock) {
-            if (!WandUtil.isPositionPlaceable(
-                    context.getWorld(), context.getPlayer(), pos, context.getState().isReplace())) {
+            if (!WandUtil.isPositionPlaceable(context.getWorld(), context.getPlayer(), pos, context.getState().isReplace())) {
                 return null;
             }
 
@@ -233,8 +206,7 @@ public final class WandPlanner {
                 if (session.available(key) <= 0) {
                     continue;
                 }
-                PlaceOperation draft = PlaceOperation.create(
-                        context, pos, key.createStack(1), supportingBlock);
+                PlaceOperation draft = PlaceOperation.create(context, pos, key.createStack(1), supportingBlock);
                 if (draft == null) {
                     continue;
                 }

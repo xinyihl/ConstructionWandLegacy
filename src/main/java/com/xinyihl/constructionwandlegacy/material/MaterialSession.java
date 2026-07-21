@@ -3,13 +3,7 @@ package com.xinyihl.constructionwandlegacy.material;
 import net.minecraft.item.Item;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Per-plan material view. Every source is enumerated once and all simulation uses this cache.

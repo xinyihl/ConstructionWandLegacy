@@ -22,8 +22,7 @@ public class ConstructionWandLegacy {
     @Mod.Instance(Tags.MOD_ID)
     public static ConstructionWandLegacy instance;
 
-    @SidedProxy(clientSide = "com.xinyihl.constructionwandlegacy.client.ClientProxy",
-            serverSide = "com.xinyihl.constructionwandlegacy.proxy.CommonProxy")
+    @SidedProxy(clientSide = "com.xinyihl.constructionwandlegacy.client.ClientProxy", serverSide = "com.xinyihl.constructionwandlegacy.proxy.CommonProxy")
     public static CommonProxy proxy;
 
     public static Logger LOGGER;

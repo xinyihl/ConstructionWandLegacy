@@ -9,7 +9,9 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
-/** World-independent block state and tile data captured for later recovery. */
+/**
+ * World-independent block state and tile data captured for later recovery.
+ */
 final class RestorationState {
     private final IBlockState state;
     @Nullable

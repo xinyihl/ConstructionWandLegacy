@@ -48,39 +48,11 @@ public abstract class ItemWand extends Item {
         addPropertyOverride(ConstructionWandLegacy.loc("using_core"), (stack, worldIn, entityIn) -> hasCustomCore(stack) ? 1.0F : 0.0F);
     }
 
-    public final WandTier getTier() {
-        return tier;
-    }
-
-    public final WandSpec getSpec() {
-        return tier.getSpec();
-    }
-
-    public final int getPlacementLimit() {
-        return tier.getConfiguredPlacementLimit();
-    }
-
     private static boolean hasCustomCore(ItemStack stack) {
         if (stack.isEmpty()) {
             return false;
         }
         return WandDataCodec.read(stack).getSelectedCore().getColor() > -1;
-    }
-
-    private boolean bindContainer(ItemStack stack, EntityPlayer player, World world, BlockPos pos) {
-        WandState state = WandDataCodec.read(stack);
-        // Only default core supports container binding
-        if (!(state.getSelectedCore() instanceof CoreDefault)) {
-            return false;
-        }
-        TileEntity tile = world.getTileEntity(pos);
-        if (tile == null) return false;
-        if (!tile.hasCapability(net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)) {
-            return false;
-        }
-        BoundContainerSourceFactory.storeBinding(stack, pos, world.provider.getDimension());
-        player.sendStatusMessage(new TextComponentTranslation(Tags.MOD_ID + ".tooltip.container_bound"), true);
-        return true;
     }
 
     public static void optionMessage(EntityPlayer player, WandOption option, WandState state) {
@@ -100,20 +72,53 @@ public abstract class ItemWand extends Item {
         player.sendStatusMessage(key, true);
     }
 
+    private static boolean executeWand(EntityPlayer player, World world, RayTraceResult hit, ItemStack wand) {
+        WandContext context = WandContext.create(player, world, hit, wand);
+        WandPlan plan = ConstructionWandLegacy.instance.getRuntime().getWandPlanner().plan(context);
+        return ConstructionWandLegacy.instance.getRuntime().getWandExecutor().execute(context, plan).isSuccess();
+    }
+
+    public final WandTier getTier() {
+        return tier;
+    }
+
+    public final WandSpec getSpec() {
+        return tier.getSpec();
+    }
+
+    public final int getPlacementLimit() {
+        return tier.getConfiguredPlacementLimit();
+    }
+
+    private boolean bindContainer(ItemStack stack, EntityPlayer player, World world, BlockPos pos) {
+        WandState state = WandDataCodec.read(stack);
+        // Only default core supports container binding
+        if (!(state.getSelectedCore() instanceof CoreDefault)) {
+            return false;
+        }
+        TileEntity tile = world.getTileEntity(pos);
+        if (tile == null) return false;
+        if (!tile.hasCapability(net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)) {
+            return false;
+        }
+        BoundContainerSourceFactory.storeBinding(stack, pos, world.provider.getDimension());
+        player.sendStatusMessage(new TextComponentTranslation(Tags.MOD_ID + ".tooltip.container_bound"), true);
+        return true;
+    }
+
     public int remainingDurability(ItemStack stack) {
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing,
-                                      float hitX, float hitY, float hitZ) {
+    public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (world.isRemote) {
             return EnumActionResult.SUCCESS;
         }
 
         ItemStack stack = player.getHeldItem(hand);
 
-        if (CompatRegistrar.tryBindAE(stack, player, world, pos)) {
+        if (player.isSneaking() && CompatRegistrar.tryBindAE(stack, player, world, pos)) {
             return EnumActionResult.SUCCESS;
         }
 
@@ -122,13 +127,11 @@ public abstract class ItemWand extends Item {
         }
 
         if (player.isSneaking()) {
-            return ConstructionWandLegacy.instance.getRuntime().getUndoService().undo(player)
-                    ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
+            return ConstructionWandLegacy.instance.getRuntime().getUndoService().undo(player) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
         }
 
         RayTraceResult hitResult = new RayTraceResult(new Vec3d(pos).add(hitX, hitY, hitZ), facing, pos);
-        return executeWand(player, world, hitResult, stack)
-                ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
+        return executeWand(player, world, hitResult, stack) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
     }
 
     @Override
@@ -142,19 +145,8 @@ public abstract class ItemWand extends Item {
             return new ActionResult<>(EnumActionResult.SUCCESS, stack);
         }
 
-        RayTraceResult miss = new RayTraceResult(RayTraceResult.Type.MISS,
-                player.getPositionEyes(1.0F),
-                EnumFacing.getFacingFromVector((float) player.getLookVec().x, (float) player.getLookVec().y, (float) player.getLookVec().z),
-                player.getPosition());
-        return new ActionResult<>(executeWand(player, world, miss, stack)
-                ? EnumActionResult.SUCCESS : EnumActionResult.FAIL, stack);
-    }
-
-    private static boolean executeWand(EntityPlayer player, World world, RayTraceResult hit, ItemStack wand) {
-        WandContext context = WandContext.create(player, world, hit, wand);
-        WandPlan plan = ConstructionWandLegacy.instance.getRuntime().getWandPlanner().plan(context);
-        return ConstructionWandLegacy.instance.getRuntime().getWandExecutor()
-                .execute(context, plan).isSuccess();
+        RayTraceResult miss = new RayTraceResult(RayTraceResult.Type.MISS, player.getPositionEyes(1.0F), EnumFacing.getFacingFromVector((float) player.getLookVec().x, (float) player.getLookVec().y, (float) player.getLookVec().z), player.getPosition());
+        return new ActionResult<>(executeWand(player, world, miss, stack) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL, stack);
     }
 
     @Override
@@ -167,16 +159,14 @@ public abstract class ItemWand extends Item {
                 if (option == WandOption.CORES) {
                     continue;
                 }
-                tooltip.add(TextFormatting.AQUA + I18n.translateToLocal(option.getKeyTranslation())
-                        + TextFormatting.GRAY + I18n.translateToLocal(option.getValueTranslation(state)));
+                tooltip.add(TextFormatting.AQUA + I18n.translateToLocal(option.getKeyTranslation()) + TextFormatting.GRAY + I18n.translateToLocal(option.getValueTranslation(state)));
             }
 
             if (!state.getCores().isEmpty()) {
                 tooltip.add("");
                 tooltip.add(TextFormatting.GRAY + I18n.translateToLocal(Tags.MOD_ID + ".tooltip.cores"));
                 for (IWandCore core : state.getCores()) {
-                    tooltip.add(I18n.translateToLocal(
-                            WandOption.CORES.getKeyTranslation() + "." + core.getRegistryName().toString()));
+                    tooltip.add(I18n.translateToLocal(WandOption.CORES.getKeyTranslation() + "." + core.getRegistryName().toString()));
                 }
             }
 
@@ -189,8 +179,7 @@ public abstract class ItemWand extends Item {
             }
         } else {
             tooltip.add(TextFormatting.GRAY + String.format(I18n.translateToLocal(Tags.MOD_ID + ".tooltip.blocks"), limit));
-            tooltip.add(TextFormatting.AQUA + I18n.translateToLocal(WandOption.CORES.getKeyTranslation())
-                    + TextFormatting.WHITE + I18n.translateToLocal(WandOption.CORES.getValueTranslation(state)));
+            tooltip.add(TextFormatting.AQUA + I18n.translateToLocal(WandOption.CORES.getKeyTranslation()) + TextFormatting.WHITE + I18n.translateToLocal(WandOption.CORES.getValueTranslation(state)));
             tooltip.add(TextFormatting.AQUA + I18n.translateToLocal(Tags.MOD_ID + ".tooltip.shift"));
         }
     }

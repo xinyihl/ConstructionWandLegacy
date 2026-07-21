@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** A no-side-effect planning reservation that can be committed exactly once. */
+/**
+ * A no-side-effect planning reservation that can be committed exactly once.
+ */
 public final class MaterialReservation {
     private final MaterialSession session;
     private final MaterialKey key;
@@ -22,6 +24,12 @@ public final class MaterialReservation {
         this.key = key;
         this.count = count;
         this.allocations = Collections.unmodifiableList(new ArrayList<>(allocations));
+    }
+
+    private static MaterialReceipt rollback(List<MaterialReceipt> extracted) {
+        MaterialReceipt rollback = MaterialReceipt.combine(extracted);
+        rollback.refund();
+        return rollback;
     }
 
     public MaterialKey getKey() {
@@ -91,7 +99,9 @@ public final class MaterialReservation {
         finished = true;
     }
 
-    /** Returns a receipt for any rollback entries that still need a retry. */
+    /**
+     * Returns a receipt for any rollback entries that still need a retry.
+     */
     @Nullable
     public synchronized MaterialReceipt getRollbackReceipt() {
         return rollbackReceipt;
@@ -103,12 +113,6 @@ public final class MaterialReservation {
 
     List<Allocation> getAllocations() {
         return allocations;
-    }
-
-    private static MaterialReceipt rollback(List<MaterialReceipt> extracted) {
-        MaterialReceipt rollback = MaterialReceipt.combine(extracted);
-        rollback.refund();
-        return rollback;
     }
 
     static final class Allocation {

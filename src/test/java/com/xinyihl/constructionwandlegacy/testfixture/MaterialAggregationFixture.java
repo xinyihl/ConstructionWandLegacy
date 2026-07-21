@@ -43,11 +43,7 @@ public final class MaterialAggregationFixture {
     }
 
     private static boolean stackEquals(ItemStack first, ItemStack second) {
-        return !first.isEmpty()
-                && !second.isEmpty()
-                && first.getItem() == second.getItem()
-                && first.getMetadata() == second.getMetadata()
-                && ItemStack.areItemStackTagsEqual(first, second);
+        return !first.isEmpty() && !second.isEmpty() && first.getItem() == second.getItem() && first.getMetadata() == second.getMetadata() && ItemStack.areItemStackTagsEqual(first, second);
     }
 
     private static int saturatedAdd(int first, int second) {

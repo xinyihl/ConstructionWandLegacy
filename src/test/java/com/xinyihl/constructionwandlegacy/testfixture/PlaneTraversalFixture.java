@@ -3,11 +3,7 @@ package com.xinyihl.constructionwandlegacy.testfixture;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -18,16 +14,7 @@ public final class PlaneTraversalFixture {
     private PlaneTraversalFixture() {
     }
 
-    public enum Lock {
-        HORIZONTAL,
-        VERTICAL,
-        NORTHSOUTH,
-        EASTWEST,
-        NOLOCK
-    }
-
-    public static List<BlockPos> traverse(BlockPos origin, EnumFacing face, Lock lock, int limit,
-                                          Predicate<BlockPos> isMatching) {
+    public static List<BlockPos> traverse(BlockPos origin, EnumFacing face, Lock lock, int limit, Predicate<BlockPos> isMatching) {
         LinkedList<BlockPos> candidates = new LinkedList<>();
         Set<BlockPos> visited = new HashSet<>();
         List<BlockPos> result = new ArrayList<>();
@@ -53,19 +40,13 @@ public final class PlaneTraversalFixture {
         switch (face) {
             case DOWN:
             case UP:
-                return new Axes(EnumFacing.NORTH, EnumFacing.SOUTH,
-                        EnumFacing.EAST, EnumFacing.WEST,
-                        permits(lock, Lock.NORTHSOUTH), permits(lock, Lock.EASTWEST));
+                return new Axes(EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST, permits(lock, Lock.NORTHSOUTH), permits(lock, Lock.EASTWEST));
             case NORTH:
             case SOUTH:
-                return new Axes(EnumFacing.EAST, EnumFacing.WEST,
-                        EnumFacing.UP, EnumFacing.DOWN,
-                        permits(lock, Lock.HORIZONTAL), permits(lock, Lock.VERTICAL));
+                return new Axes(EnumFacing.EAST, EnumFacing.WEST, EnumFacing.UP, EnumFacing.DOWN, permits(lock, Lock.HORIZONTAL), permits(lock, Lock.VERTICAL));
             case EAST:
             case WEST:
-                return new Axes(EnumFacing.NORTH, EnumFacing.SOUTH,
-                        EnumFacing.UP, EnumFacing.DOWN,
-                        permits(lock, Lock.HORIZONTAL), permits(lock, Lock.VERTICAL));
+                return new Axes(EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.UP, EnumFacing.DOWN, permits(lock, Lock.HORIZONTAL), permits(lock, Lock.VERTICAL));
             default:
                 throw new IllegalArgumentException("Unsupported face: " + face);
         }
@@ -92,6 +73,10 @@ public final class PlaneTraversalFixture {
         }
     }
 
+    public enum Lock {
+        HORIZONTAL, VERTICAL, NORTHSOUTH, EASTWEST, NOLOCK
+    }
+
     private static final class Axes {
         private final EnumFacing firstA;
         private final EnumFacing firstB;
@@ -100,8 +85,7 @@ public final class PlaneTraversalFixture {
         private final boolean useFirst;
         private final boolean useSecond;
 
-        private Axes(EnumFacing firstA, EnumFacing firstB, EnumFacing secondA, EnumFacing secondB,
-                     boolean useFirst, boolean useSecond) {
+        private Axes(EnumFacing firstA, EnumFacing firstB, EnumFacing secondA, EnumFacing secondB, boolean useFirst, boolean useSecond) {
             this.firstA = firstA;
             this.firstB = firstB;
             this.secondA = secondA;

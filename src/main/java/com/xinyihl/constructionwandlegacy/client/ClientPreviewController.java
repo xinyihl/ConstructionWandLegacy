@@ -83,24 +83,19 @@ public final class ClientPreviewController {
             mode = PreviewKey.Mode.AIR;
             targetPos = player.getPosition();
             targetSide = EnumFacing.getFacingFromVector((float) look.x, (float) look.y, (float) look.z);
-            planningHit = new RayTraceResult(RayTraceResult.Type.MISS,
-                    player.getPositionEyes(1.0F), targetSide, targetPos);
+            planningHit = new RayTraceResult(RayTraceResult.Type.MISS, player.getPositionEyes(1.0F), targetSide, targetPos);
         }
 
-        PreviewKey key = PreviewKey.create(mode, player.world.provider.getDimension(),
-                player.world.getTotalWorldTime(), player.posX, player.posY, player.posZ,
-                look, targetPos, targetSide, target, wand, wandState, rules.getRevision());
+        PreviewKey key = PreviewKey.create(mode, player.world.provider.getDimension(), player.world.getTotalWorldTime(), player.posX, player.posY, player.posZ, look, targetPos, targetSide, target, wand, wandState, rules.getRevision());
         PreviewSnapshot next = cache.update(currentClientTick, key, () -> {
             if (mode == PreviewKey.Mode.UNDO) {
-                return PreviewSnapshot.create(key, clientState.getUndoBlocks(),
-                        PreviewSnapshot.PreviewColor.GREEN);
+                return PreviewSnapshot.create(key, clientState.getUndoBlocks(), PreviewSnapshot.PreviewColor.GREEN);
             }
             WandContext context = WandContext.create(player, player.world, planningHit, wand, rules);
             WandPlan plan = planner.plan(context);
             try {
                 int packedColor = wandState.getSelectedCore().getColor();
-                PreviewSnapshot.PreviewColor color = colors.computeIfAbsent(packedColor,
-                        PreviewSnapshot.PreviewColor::fromPacked);
+                PreviewSnapshot.PreviewColor color = colors.computeIfAbsent(packedColor, PreviewSnapshot.PreviewColor::fromPacked);
                 return PreviewSnapshot.create(key, plan.getBlockPositions(), color);
             } finally {
                 plan.discard();

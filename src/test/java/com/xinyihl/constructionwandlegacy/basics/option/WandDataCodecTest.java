@@ -15,11 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class WandDataCodecTest {
     private static final ResourceLocation TEST_CORE_ID = new ResourceLocation("constructionwandlegacy_test", "core");
@@ -31,6 +27,26 @@ public class WandDataCodecTest {
         ConstructionWandLegacy.LOGGER = LogManager.getLogger(WandDataCodecTest.class);
         TEST_CORE.setRegistryName(TEST_CORE_ID);
         ForgeRegistries.ITEMS.register(TEST_CORE);
+    }
+
+    private static ItemStack wand() {
+        return new ItemStack(new Item().setRegistryName(new ResourceLocation("constructionwandlegacy_test", "wand")));
+    }
+
+    private static ItemStack wandWithLegacyData() {
+        ItemStack stack = wand();
+        NBTTagCompound data = new NBTTagCompound();
+        NBTTagList cores = new NBTTagList();
+        cores.appendTag(new NBTTagString(TEST_CORE_ID.toString()));
+        data.setTag("cores", cores);
+        data.setByte("cores_sel", (byte) 1);
+        data.setString("lock", "vertical");
+        data.setString("direction", "player");
+        data.setBoolean("replace", false);
+        data.setString("match", "exact");
+        data.setBoolean("random", true);
+        stack.setTagInfo(WandDataCodec.TAG_ROOT, data);
+        return stack;
     }
 
     @Test
@@ -147,35 +163,12 @@ public class WandDataCodecTest {
         ItemStack stack = wandWithLegacyData();
         WandState state = WandDataCodec.read(stack);
 
-        assertEquals(state.getLock().ordinal(),
-                WandDataCodec.getNetworkValue(state, WandOption.LOCK));
-        assertTrue(WandDataCodec.updateNetworkValue(
-                stack, WandOption.LOCK, WandState.Lock.EASTWEST.ordinal()));
+        assertEquals(state.getLock().ordinal(), WandDataCodec.getNetworkValue(state, WandOption.LOCK));
+        assertTrue(WandDataCodec.updateNetworkValue(stack, WandOption.LOCK, WandState.Lock.EASTWEST.ordinal()));
         assertEquals("eastwest", stack.getSubCompound(WandDataCodec.TAG_ROOT).getString("lock"));
-        assertFalse(WandDataCodec.updateNetworkValue(
-                stack, WandOption.LOCK, WandState.Lock.values().length));
+        assertFalse(WandDataCodec.updateNetworkValue(stack, WandOption.LOCK, WandState.Lock.values().length));
         assertFalse(WandDataCodec.updateNetworkValue(stack, WandOption.REPLACE, 2));
         assertFalse(WandDataCodec.updateNetworkValue(stack, WandOption.CORES, 127));
-    }
-
-    private static ItemStack wand() {
-        return new ItemStack(new Item().setRegistryName(new ResourceLocation("constructionwandlegacy_test", "wand")));
-    }
-
-    private static ItemStack wandWithLegacyData() {
-        ItemStack stack = wand();
-        NBTTagCompound data = new NBTTagCompound();
-        NBTTagList cores = new NBTTagList();
-        cores.appendTag(new NBTTagString(TEST_CORE_ID.toString()));
-        data.setTag("cores", cores);
-        data.setByte("cores_sel", (byte) 1);
-        data.setString("lock", "vertical");
-        data.setString("direction", "player");
-        data.setBoolean("replace", false);
-        data.setString("match", "exact");
-        data.setBoolean("random", true);
-        stack.setTagInfo(WandDataCodec.TAG_ROOT, data);
-        return stack;
     }
 
     private static final class TestCore extends Item implements IWandCore {

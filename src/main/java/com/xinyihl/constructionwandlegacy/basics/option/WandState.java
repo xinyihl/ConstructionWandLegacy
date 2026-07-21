@@ -20,20 +20,21 @@ public final class WandState {
     private final Match match;
     private final boolean random;
 
-    WandState(List<IWandCore> cores, int selectedCoreIndex, Lock lock, Direction direction,
-              boolean replace, Match match, boolean random) {
+    WandState(List<IWandCore> cores, int selectedCoreIndex, Lock lock, Direction direction, boolean replace, Match match, boolean random) {
         if (cores.isEmpty()) {
             throw new IllegalArgumentException("A wand state must contain its default core");
         }
         this.cores = Collections.unmodifiableList(new ArrayList<>(cores));
-        this.selectedCoreIndex = selectedCoreIndex >= 0 && selectedCoreIndex < cores.size()
-                ? selectedCoreIndex
-                : 0;
+        this.selectedCoreIndex = selectedCoreIndex >= 0 && selectedCoreIndex < cores.size() ? selectedCoreIndex : 0;
         this.lock = lock;
         this.direction = direction;
         this.replace = replace;
         this.match = match;
         this.random = random;
+    }
+
+    private static String enumValue(Enum<?> value) {
+        return value.name().toLowerCase(Locale.ROOT);
     }
 
     public List<IWandCore> getCores() {
@@ -118,26 +119,15 @@ public final class WandState {
         return upgrade instanceof IWandCore && cores.contains(upgrade);
     }
 
-    private static String enumValue(Enum<?> value) {
-        return value.name().toLowerCase(Locale.ROOT);
-    }
-
     public enum Lock {
-        HORIZONTAL,
-        VERTICAL,
-        NORTHSOUTH,
-        EASTWEST,
-        NOLOCK
+        HORIZONTAL, VERTICAL, NORTHSOUTH, EASTWEST, NOLOCK
     }
 
     public enum Direction {
-        TARGET,
-        PLAYER
+        TARGET, PLAYER
     }
 
     public enum Match {
-        EXACT,
-        SIMILAR,
-        ANY
+        EXACT, SIMILAR, ANY
     }
 }

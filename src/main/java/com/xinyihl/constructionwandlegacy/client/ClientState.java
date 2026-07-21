@@ -29,9 +29,7 @@ public final class ClientState {
     }
 
     public void replaceUndoBlocks(Set<BlockPos> blocks) {
-        undoBlocks = blocks == null || blocks.isEmpty()
-                ? Collections.emptySet()
-                : Collections.unmodifiableSet(new LinkedHashSet<>(blocks));
+        undoBlocks = blocks == null || blocks.isEmpty() ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(blocks));
     }
 
     public synchronized boolean applyServerRules(RuleSnapshot rules) {
@@ -60,7 +58,9 @@ public final class ClientState {
         serverRulesRevision = Long.MIN_VALUE;
     }
 
-    /** Clears world-local positions while retaining the rules for a dimension change. */
+    /**
+     * Clears world-local positions while retaining the rules for a dimension change.
+     */
     public synchronized void resetWorld() {
         preview = PreviewSnapshot.empty();
         undoBlocks = Collections.emptySet();

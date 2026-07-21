@@ -51,7 +51,6 @@ public final class ClientItemEvents {
         if (item == null || item.getRegistryName() == null) {
             return;
         }
-        ModelLoader.setCustomModelResourceLocation(item, 0,
-                new ModelResourceLocation(item.getRegistryName(), "inventory"));
+        ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
     }
 }

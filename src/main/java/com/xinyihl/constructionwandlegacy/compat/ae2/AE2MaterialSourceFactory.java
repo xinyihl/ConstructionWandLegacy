@@ -17,12 +17,7 @@ import appeng.me.helpers.MachineSource;
 import appeng.tile.networking.TileController;
 import appeng.util.item.AEItemStack;
 import com.xinyihl.constructionwandlegacy.ConstructionWandLegacy;
-import com.xinyihl.constructionwandlegacy.material.MaterialCollector;
-import com.xinyihl.constructionwandlegacy.material.MaterialKey;
-import com.xinyihl.constructionwandlegacy.material.MaterialReceipt;
-import com.xinyihl.constructionwandlegacy.material.MaterialSource;
-import com.xinyihl.constructionwandlegacy.material.MaterialSourceFactory;
-import com.xinyihl.constructionwandlegacy.material.SaturatedAmounts;
+import com.xinyihl.constructionwandlegacy.material.*;
 import com.xinyihl.constructionwandlegacy.material.source.InventoryRefunds;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -35,6 +30,14 @@ import net.minecraftforge.fml.common.Optional;
 import javax.annotation.Nullable;
 
 public final class AE2MaterialSourceFactory implements MaterialSourceFactory {
+    @Nullable
+    @Optional.Method(modid = "appliedenergistics2")
+    private static MaterialSource createSource(EntityPlayer player, World world, BlockPos pos, TileController controller, IGrid grid, IActionSource actionSource) {
+        IStorageGrid storageGrid = grid.getCache(IStorageGrid.class);
+        IMEMonitor<IAEItemStack> storage = storageGrid.getInventory(AEApi.instance().storage().getStorageChannel(IItemStorageChannel.class));
+        return storage == null ? null : new AE2MaterialSource(player, world, pos, controller, grid, storage, actionSource);
+    }
+
     @Nullable
     @Override
     @Optional.Method(modid = "appliedenergistics2")
@@ -59,26 +62,13 @@ public final class AE2MaterialSourceFactory implements MaterialSourceFactory {
             if (node == null || !security.hasPermission(player, SecurityPermissions.EXTRACT)) {
                 return null;
             }
-            return createSource(player, boundWorld, boundPos, controller,
-                    node.getGrid(), new MachineSource(controller));
+            return createSource(player, boundWorld, boundPos, controller, node.getGrid(), new MachineSource(controller));
         } catch (GridAccessException exception) {
             if (ConstructionWandLegacy.LOGGER != null) {
                 ConstructionWandLegacy.LOGGER.debug("Unable to resolve bound AE2 grid", exception);
             }
             return null;
         }
-    }
-
-    @Nullable
-    @Optional.Method(modid = "appliedenergistics2")
-    private static MaterialSource createSource(EntityPlayer player, World world, BlockPos pos,
-                                               TileController controller, IGrid grid,
-                                               IActionSource actionSource) {
-        IStorageGrid storageGrid = grid.getCache(IStorageGrid.class);
-        IMEMonitor<IAEItemStack> storage = storageGrid.getInventory(
-                AEApi.instance().storage().getStorageChannel(IItemStorageChannel.class));
-        return storage == null ? null
-                : new AE2MaterialSource(player, world, pos, controller, grid, storage, actionSource);
     }
 
     private static final class AE2MaterialSource implements MaterialSource {
@@ -92,9 +82,7 @@ public final class AE2MaterialSourceFactory implements MaterialSourceFactory {
         private final IMEMonitor<IAEItemStack> storage;
         private final IActionSource actionSource;
 
-        private AE2MaterialSource(EntityPlayer player, World world, BlockPos pos,
-                                  TileController controller, IGrid grid,
-                                  IMEMonitor<IAEItemStack> storage, IActionSource actionSource) {
+        private AE2MaterialSource(EntityPlayer player, World world, BlockPos pos, TileController controller, IGrid grid, IMEMonitor<IAEItemStack> storage, IActionSource actionSource) {
             this.player = player;
             this.world = world;
             this.pos = pos;
@@ -161,8 +149,7 @@ public final class AE2MaterialSourceFactory implements MaterialSourceFactory {
                 request.setStackSize(count);
                 try {
                     IAEItemStack rejected = storage.injectItems(request, Actionable.MODULATE, actionSource);
-                    remaining = rejected == null ? 0
-                            : Math.min(count, SaturatedAmounts.fromLong(rejected.getStackSize()));
+                    remaining = rejected == null ? 0 : Math.min(count, SaturatedAmounts.fromLong(rejected.getStackSize()));
                 } catch (RuntimeException ignored) {
                     remaining = count;
                 }
@@ -172,19 +159,16 @@ public final class AE2MaterialSourceFactory implements MaterialSourceFactory {
 
         @Optional.Method(modid = "appliedenergistics2")
         private boolean isValidEndpoint(SecurityPermissions permission) {
-            if (world == null || world.isRemote || !world.isBlockLoaded(pos)
-                    || world.getTileEntity(pos) != controller || controller.isInvalid()) {
+            if (world == null || world.isRemote || !world.isBlockLoaded(pos) || world.getTileEntity(pos) != controller || controller.isInvalid()) {
                 return false;
             }
             try {
                 IGridNode node = controller.getGridNode(null);
-                if (node == null || node.getGrid() != grid
-                        || !controller.getProxy().getSecurity().hasPermission(player, permission)) {
+                if (node == null || node.getGrid() != grid || !controller.getProxy().getSecurity().hasPermission(player, permission)) {
                     return false;
                 }
                 IStorageGrid currentStorage = grid.getCache(IStorageGrid.class);
-                return currentStorage.getInventory(AEApi.instance().storage()
-                        .getStorageChannel(IItemStorageChannel.class)) == storage;
+                return currentStorage.getInventory(AEApi.instance().storage().getStorageChannel(IItemStorageChannel.class)) == storage;
             } catch (GridAccessException | RuntimeException exception) {
                 return false;
             }

@@ -49,37 +49,30 @@ public final class CompatRegistrar {
             return false;
         }
         WandState state = WandDataCodec.read(wand);
-        if (!(state.getSelectedCore() instanceof ItemCoreAE)
-                || !AE2Provider.tryBind(wand, player, world, pos)) {
+        if (!(state.getSelectedCore() instanceof ItemCoreAE) || !AE2Provider.tryBind(wand, player, world, pos)) {
             return false;
         }
         ResourceLocation coreId = state.getSelectedCore().getRegistryName();
         if (coreId != null) {
-            player.sendStatusMessage(new TextComponentTranslation(
-                    Tags.MOD_ID + ".option.cores." + coreId + ".bound"), true);
+            player.sendStatusMessage(new TextComponentTranslation(Tags.MOD_ID + ".option.cores." + coreId + ".bound"), true);
         }
         return true;
     }
 
     public static boolean hasAE2Binding(ItemStack wand, IWandCore selectedCore) {
-        return Loader.isModLoaded(AE2_MOD_ID)
-                && selectedCore instanceof ItemCoreAE
-                && AE2Provider.hasBinding(wand);
+        return Loader.isModLoaded(AE2_MOD_ID) && selectedCore instanceof ItemCoreAE && AE2Provider.hasBinding(wand);
     }
 
     private static final class BaublesProvider {
-        private static final MaterialSourceFactory MATERIAL_SOURCE_FACTORY =
-                new BaublesMaterialSourceFactory();
+        private static final MaterialSourceFactory MATERIAL_SOURCE_FACTORY = new BaublesMaterialSourceFactory();
     }
 
     private static final class ProjectEProvider {
-        private static final MaterialSourceFactory MATERIAL_SOURCE_FACTORY =
-                new ProjectEMaterialSourceFactory();
+        private static final MaterialSourceFactory MATERIAL_SOURCE_FACTORY = new ProjectEMaterialSourceFactory();
     }
 
     private static final class AE2Provider {
-        private static final MaterialSourceFactory MATERIAL_SOURCE_FACTORY =
-                AE2Compat.materialSourceFactory();
+        private static final MaterialSourceFactory MATERIAL_SOURCE_FACTORY = AE2Compat.materialSourceFactory();
 
         private static boolean tryBind(ItemStack wand, EntityPlayer player, World world, BlockPos pos) {
             return AE2Compat.tryBind(wand, player, world, pos);

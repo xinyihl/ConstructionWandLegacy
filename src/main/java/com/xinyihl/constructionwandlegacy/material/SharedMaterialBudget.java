@@ -3,7 +3,9 @@ package com.xinyihl.constructionwandlegacy.material;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Shared long-valued budget for virtual sources such as ProjectE EMC. */
+/**
+ * Shared long-valued budget for virtual sources such as ProjectE EMC.
+ */
 public final class SharedMaterialBudget {
     private final long total;
     private final Map<MaterialKey, Long> unitCosts = new HashMap<>();

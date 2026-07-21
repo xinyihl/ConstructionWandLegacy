@@ -7,7 +7,9 @@ import net.minecraft.util.EnumHand;
 
 import javax.annotation.Nullable;
 
-/** A held-wand location that can be revalidated when a delayed packet is handled. */
+/**
+ * A held-wand location that can be revalidated when a delayed packet is handled.
+ */
 public final class WandTarget {
     public static final int OFFHAND_SLOT = 40;
 
@@ -46,9 +48,11 @@ public final class WandTarget {
         if (player == null || hand == null || !isWand(player.getHeldItem(hand))) {
             return null;
         }
-        return hand == EnumHand.MAIN_HAND
-                ? new WandTarget(hand, player.inventory.currentItem)
-                : new WandTarget(hand, OFFHAND_SLOT);
+        return hand == EnumHand.MAIN_HAND ? new WandTarget(hand, player.inventory.currentItem) : new WandTarget(hand, OFFHAND_SLOT);
+    }
+
+    private static boolean isWand(ItemStack stack) {
+        return stack != null && !stack.isEmpty() && stack.getItem() instanceof ItemWand;
     }
 
     public ItemStack resolve(EntityPlayer player) {
@@ -72,9 +76,5 @@ public final class WandTarget {
 
     public int getSlot() {
         return slot;
-    }
-
-    private static boolean isWand(ItemStack stack) {
-        return stack != null && !stack.isEmpty() && stack.getItem() instanceof ItemWand;
     }
 }

@@ -36,6 +36,10 @@ public class PacketWandOption implements IMessage {
         }
     }
 
+    private static boolean isSlotValid(EnumHand hand, int slot) {
+        return hand == EnumHand.MAIN_HAND ? slot >= 0 && slot < 9 : slot == WandTarget.OFFHAND_SLOT;
+    }
+
     @Override
     public void fromBytes(ByteBuf buf) {
         valid = false;
@@ -53,8 +57,7 @@ public class PacketWandOption implements IMessage {
                 return;
             }
             notify = notifyValue == 1;
-            valid = option != null && hand != null && value <= 255
-                    && isSlotValid(hand, slot) && !buf.isReadable();
+            valid = option != null && hand != null && value <= 255 && isSlotValid(hand, slot) && !buf.isReadable();
         } catch (IndexOutOfBoundsException | IllegalArgumentException ignored) {
             valid = false;
         }
@@ -97,21 +100,7 @@ public class PacketWandOption implements IMessage {
         return notify;
     }
 
-    private static boolean isSlotValid(EnumHand hand, int slot) {
-        return hand == EnumHand.MAIN_HAND ? slot >= 0 && slot < 9 : slot == WandTarget.OFFHAND_SLOT;
-    }
-
     public static class Handler implements IMessageHandler<PacketWandOption, IMessage> {
-        @Override
-        public IMessage onMessage(PacketWandOption message, MessageContext ctx) {
-            if (!message.valid) {
-                return null;
-            }
-            EntityPlayerMP player = ctx.getServerHandler().player;
-            player.getServerWorld().addScheduledTask(() -> apply(message, player));
-            return null;
-        }
-
         private static void apply(PacketWandOption message, EntityPlayerMP player) {
             WandTarget target;
             try {
@@ -124,8 +113,7 @@ public class PacketWandOption implements IMessage {
                 return;
             }
             WandState before = WandDataCodec.read(wand);
-            if (!WandDataCodec.isValidNetworkValue(before, message.option, message.value)
-                    || !WandDataCodec.updateNetworkValue(wand, message.option, message.value)) {
+            if (!WandDataCodec.isValidNetworkValue(before, message.option, message.value) || !WandDataCodec.updateNetworkValue(wand, message.option, message.value)) {
                 return;
             }
             WandState after = WandDataCodec.read(wand);
@@ -134,6 +122,16 @@ public class PacketWandOption implements IMessage {
             }
             player.inventory.markDirty();
             player.inventoryContainer.detectAndSendChanges();
+        }
+
+        @Override
+        public IMessage onMessage(PacketWandOption message, MessageContext ctx) {
+            if (!message.valid) {
+                return null;
+            }
+            EntityPlayerMP player = ctx.getServerHandler().player;
+            player.getServerWorld().addScheduledTask(() -> apply(message, player));
+            return null;
         }
     }
 }
