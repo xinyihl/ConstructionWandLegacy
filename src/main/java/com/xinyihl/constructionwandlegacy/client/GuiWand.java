@@ -1,7 +1,9 @@
 package com.xinyihl.constructionwandlegacy.client;
 
-import com.xinyihl.constructionwandlegacy.basics.option.IOption;
-import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
+import com.xinyihl.constructionwandlegacy.basics.WandTarget;
+import com.xinyihl.constructionwandlegacy.basics.option.WandDataCodec;
+import com.xinyihl.constructionwandlegacy.basics.option.WandOption;
+import com.xinyihl.constructionwandlegacy.basics.option.WandState;
 import com.xinyihl.constructionwandlegacy.network.ModMessages;
 import com.xinyihl.constructionwandlegacy.network.PacketWandOption;
 import net.minecraft.client.Minecraft;
@@ -25,27 +27,29 @@ public class GuiWand extends GuiScreen {
     private static final int FIELD_WIDTH = COLS * (BUTTON_WIDTH + SPACING_WIDTH) - SPACING_WIDTH;
     private static final int FIELD_HEIGHT = ROWS * (BUTTON_HEIGHT + SPACING_HEIGHT) - SPACING_HEIGHT;
 
+    private final WandTarget target;
     private final ItemStack wand;
-    private final WandOptions options;
+    private WandState state;
 
-    public GuiWand(ItemStack wand) {
-        this.wand = wand;
-        this.options = new WandOptions(wand);
+    public GuiWand(WandTarget target, ItemStack wand) {
+        this.target = target;
+        this.wand = wand.copy();
+        this.state = WandDataCodec.read(wand);
     }
 
-    private static String getButtonLabel(IOption<?> option) {
-        return I18n.format(option.getKeyTranslation()) + I18n.format(option.getValueTranslation());
+    private String getButtonLabel(WandOption option) {
+        return I18n.format(option.getKeyTranslation()) + I18n.format(option.getValueTranslation(state));
     }
 
     @Override
     public void initGui() {
         buttonList.clear();
-        createButton(0, 0, options.cores);
-        createButton(0, 1, options.lock);
-        createButton(0, 2, options.direction);
-        createButton(1, 0, options.replace);
-        createButton(1, 1, options.match);
-        createButton(1, 2, options.random);
+        createButton(0, 0, WandOption.CORES);
+        createButton(0, 1, WandOption.LOCK);
+        createButton(0, 2, WandOption.DIRECTION);
+        createButton(1, 0, WandOption.REPLACE);
+        createButton(1, 1, WandOption.MATCH);
+        createButton(1, 2, WandOption.RANDOM);
     }
 
     @Override
@@ -57,7 +61,8 @@ public class GuiWand extends GuiScreen {
         for (GuiButton button : buttonList) {
             if (button instanceof OptionButton && button.isMouseOver()) {
                 OptionButton optionButton = (OptionButton) button;
-                drawHoveringText(Collections.singletonList(I18n.format(optionButton.option.getDescTranslation())), mouseX, mouseY);
+                drawHoveringText(Collections.singletonList(
+                        I18n.format(optionButton.option.getDescriptionTranslation(state))), mouseX, mouseY);
                 break;
             }
         }
@@ -70,9 +75,13 @@ public class GuiWand extends GuiScreen {
         }
 
         OptionButton optionButton = (OptionButton) button;
-        optionButton.option.next(true);
+        if (!WandDataCodec.cycle(wand, optionButton.option, true)) {
+            return;
+        }
+        state = WandDataCodec.read(wand);
         optionButton.displayString = getButtonLabel(optionButton.option);
-        ModMessages.sendToServer(new PacketWandOption(optionButton.option, false));
+        ModMessages.sendToServer(new PacketWandOption(optionButton.option, target,
+                WandDataCodec.getNetworkValue(state, optionButton.option), false));
     }
 
     @Override
@@ -84,9 +93,9 @@ public class GuiWand extends GuiScreen {
         super.keyTyped(typedChar, keyCode);
     }
 
-    private void createButton(int col, int row, IOption<?> option) {
+    private void createButton(int col, int row, WandOption option) {
         OptionButton button = new OptionButton(buttonList.size(), getX(col), getY(row), option);
-        button.enabled = option.isEnabled();
+        button.enabled = state.isEnabled(option);
         buttonList.add(button);
     }
 
@@ -98,10 +107,10 @@ public class GuiWand extends GuiScreen {
         return height / 2 - FIELD_HEIGHT / 2 + row * (BUTTON_HEIGHT + SPACING_HEIGHT);
     }
 
-    private static final class OptionButton extends GuiButton {
-        private final IOption<?> option;
+    private final class OptionButton extends GuiButton {
+        private final WandOption option;
 
-        private OptionButton(int buttonId, int x, int y, IOption<?> option) {
+        private OptionButton(int buttonId, int x, int y, WandOption option) {
             super(buttonId, x, y, BUTTON_WIDTH, BUTTON_HEIGHT, getButtonLabel(option));
             this.option = option;
         }

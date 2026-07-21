@@ -1,20 +1,20 @@
 package com.xinyihl.constructionwandlegacy.items.wand;
 
-import com.xinyihl.constructionwandlegacy.basics.config.ConfigServer;
+import com.xinyihl.constructionwandlegacy.wand.WandTier;
 import net.minecraft.item.ItemStack;
 
 public class ItemWandBasic extends ItemWand {
     private final ItemStack repairItem;
 
-    public ItemWandBasic(ItemStack repairItem) {
-        super();
+    public ItemWandBasic(WandTier tier, ItemStack repairItem) {
+        super(tier);
         this.repairItem = repairItem;
-        setMaxDamage(131);
+        setMaxDamage(getSpec().getDurability());
     }
 
     @Override
     public int getMaxDamage(ItemStack stack) {
-        return ConfigServer.getWandProperties(this).getDurability();
+        return getSpec().getDurability();
     }
 
     @Override

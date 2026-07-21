@@ -1,9 +1,9 @@
 package com.xinyihl.constructionwandlegacy.items.core;
 
 import com.xinyihl.constructionwandlegacy.ConstructionWandLegacy;
-import com.xinyihl.constructionwandlegacy.api.IWandAction;
-import com.xinyihl.constructionwandlegacy.api.IWandCore;
 import com.xinyihl.constructionwandlegacy.wand.action.ActionConstruction;
+import com.xinyihl.constructionwandlegacy.wand.action.WandAction;
+import com.xinyihl.constructionwandlegacy.wand.upgrade.IWandCore;
 import net.minecraft.util.ResourceLocation;
 
 public class CoreDefault implements IWandCore {
@@ -13,8 +13,8 @@ public class CoreDefault implements IWandCore {
     }
 
     @Override
-    public IWandAction getWandAction() {
-        return new ActionConstruction();
+    public WandAction getWandAction() {
+        return ActionConstruction.INSTANCE;
     }
 
     @Override

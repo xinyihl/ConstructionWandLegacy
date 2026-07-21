@@ -1,5 +1,6 @@
 package com.xinyihl.constructionwandlegacy.basics;
 
+import com.xinyihl.constructionwandlegacy.config.ConfigRuntime;
 import com.xinyihl.constructionwandlegacy.items.wand.ItemWand;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -25,15 +26,6 @@ public final class WandUtil {
     private WandUtil() {
     }
 
-    public static boolean stackEquals(ItemStack first, ItemStack second) {
-        if (first.isEmpty() || second.isEmpty()) {
-            return false;
-        }
-        return first.getItem() == second.getItem()
-                && first.getMetadata() == second.getMetadata()
-                && ItemStack.areItemStackTagsEqual(first, second);
-    }
-
     public static List<ItemStack> getHotbarWithOffhand(EntityPlayer player) {
         ArrayList<ItemStack> hotbar = new ArrayList<>(10);
         for (int i = 0; i < 9; i++) {
@@ -41,14 +33,6 @@ public final class WandUtil {
         }
         hotbar.add(player.getHeldItemOffhand());
         return hotbar;
-    }
-
-    public static List<ItemStack> getMainInv(EntityPlayer player) {
-        ArrayList<ItemStack> mainInventory = new ArrayList<>();
-        for (int i = 9; i < player.inventory.mainInventory.size(); i++) {
-            mainInventory.add(player.inventory.getStackInSlot(i));
-        }
-        return mainInventory;
     }
 
     public static ItemStack holdingWand(EntityPlayer player) {
@@ -127,7 +111,7 @@ public final class WandUtil {
         }
 
         if (expectedBlock != null) {
-            if (!ReplacementRegistry.matchBlocks(state.getBlock(), expectedBlock.getBlock())) {
+            if (!ConfigRuntime.getBlockEquivalenceIndex().matchBlocks(state.getBlock(), expectedBlock.getBlock())) {
                 return false;
             }
             int currentMeta = state.getBlock().getMetaFromState(state);

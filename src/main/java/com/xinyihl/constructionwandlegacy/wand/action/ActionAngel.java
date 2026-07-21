@@ -1,62 +1,53 @@
 package com.xinyihl.constructionwandlegacy.wand.action;
 
-import com.xinyihl.constructionwandlegacy.api.IWandAction;
-import com.xinyihl.constructionwandlegacy.api.IWandSupplier;
-import com.xinyihl.constructionwandlegacy.basics.config.ConfigServer;
-import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
-import com.xinyihl.constructionwandlegacy.wand.undo.ISnapshot;
-import net.minecraft.entity.player.EntityPlayer;
+import com.xinyihl.constructionwandlegacy.items.wand.ItemWand;
+import com.xinyihl.constructionwandlegacy.wand.WandContext;
+import com.xinyihl.constructionwandlegacy.wand.WandOperation;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 
-import javax.annotation.Nonnull;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
-public class ActionAngel implements IWandAction {
+public final class ActionAngel implements WandAction {
+    public static final ActionAngel INSTANCE = new ActionAngel();
+
+    private ActionAngel() {
+    }
+
     @Override
     public int getLimit(ItemStack wand) {
-        return ConfigServer.getWandProperties(wand.getItem()).getAngel();
+        return ((ItemWand) wand.getItem()).getSpec().getAngelRange();
     }
 
-    @Nonnull
     @Override
-    public List<ISnapshot> getSnapshots(World world, EntityPlayer player, RayTraceResult rayTraceResult, ItemStack wand,
-                                        WandOptions options, IWandSupplier supplier, int limit) {
-        LinkedList<ISnapshot> placeSnapshots = new LinkedList<>();
+    public List<WandOperation> plan(WandContext context, OperationResolver resolver, int limit) {
+        RayTraceResult hit = context.getRayTraceResult();
+        if (hit == null || hit.sideHit == null) {
+            return Collections.emptyList();
+        }
 
-        EnumFacing placeDirection = rayTraceResult.sideHit;
-        BlockPos currentPos = rayTraceResult.getBlockPos();
-
-        for (int i = 0; i < limit; i++) {
-            currentPos = currentPos.offset(placeDirection.getOpposite());
-
-            ISnapshot snapshot = supplier.getPlaceSnapshot(world, currentPos, rayTraceResult,
-                    world.getBlockState(rayTraceResult.getBlockPos()));
-            if (snapshot != null) {
-                placeSnapshots.add(snapshot);
-                break;
+        BlockPos current = hit.getBlockPos();
+        EnumFacing direction = hit.sideHit.getOpposite();
+        for (int distance = 0; distance < limit; distance++) {
+            current = current.offset(direction);
+            WandOperation operation = resolver.createPlacement(
+                    current, context.getWorld().getBlockState(hit.getBlockPos()));
+            if (operation != null) {
+                return Collections.singletonList(operation);
             }
         }
-        return placeSnapshots;
+        return Collections.emptyList();
     }
 
-    @Nonnull
     @Override
-    public List<ISnapshot> getSnapshotsFromAir(World world, EntityPlayer player, RayTraceResult rayTraceResult, ItemStack wand,
-                                               WandOptions options, IWandSupplier supplier, int limit) {
-        LinkedList<ISnapshot> placeSnapshots = new LinkedList<>();
-        Vec3d placeVec = player.getPositionVector().add(player.getLookVec().scale(2));
-        BlockPos currentPos = new BlockPos(placeVec);
-
-        ISnapshot snapshot = supplier.getPlaceSnapshot(world, currentPos, rayTraceResult, null);
-        if (snapshot != null) {
-            placeSnapshots.add(snapshot);
-        }
-        return placeSnapshots;
+    public List<WandOperation> planFromAir(WandContext context, OperationResolver resolver, int limit) {
+        Vec3d placeVector = context.getPlayer().getPositionVector()
+                .add(context.getPlayer().getLookVec().scale(2));
+        WandOperation operation = resolver.createPlacement(new BlockPos(placeVector), null);
+        return operation == null ? Collections.emptyList() : Collections.singletonList(operation);
     }
 }

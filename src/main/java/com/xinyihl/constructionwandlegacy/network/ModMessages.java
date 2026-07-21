@@ -6,18 +6,27 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 
 public final class ModMessages {
+    public static final String CHANNEL_NAME = "xcwl";
+    public static final int ID_UNDO_BLOCKS = 0;
+    public static final int ID_QUERY_UNDO = 1;
+    public static final int ID_WAND_OPTION = 2;
+    public static final int ID_SERVER_RULES = 3;
+
     private static SimpleNetworkWrapper INSTANCE;
 
     private ModMessages() {
     }
 
     public static void register() {
-        INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel("xcwl");
-        int packetIndex = 0;
-
-        INSTANCE.registerMessage(PacketUndoBlocks.Handler.class, PacketUndoBlocks.class, packetIndex++, Side.CLIENT);
-        INSTANCE.registerMessage(PacketQueryUndo.Handler.class, PacketQueryUndo.class, packetIndex++, Side.SERVER);
-        INSTANCE.registerMessage(PacketWandOption.Handler.class, PacketWandOption.class, packetIndex, Side.SERVER);
+        INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(CHANNEL_NAME);
+        INSTANCE.registerMessage(PacketUndoBlocks.Handler.class, PacketUndoBlocks.class,
+                ID_UNDO_BLOCKS, Side.CLIENT);
+        INSTANCE.registerMessage(PacketQueryUndo.Handler.class, PacketQueryUndo.class,
+                ID_QUERY_UNDO, Side.SERVER);
+        INSTANCE.registerMessage(PacketWandOption.Handler.class, PacketWandOption.class,
+                ID_WAND_OPTION, Side.SERVER);
+        INSTANCE.registerMessage(PacketServerRules.Handler.class, PacketServerRules.class,
+                ID_SERVER_RULES, Side.CLIENT);
     }
 
     public static <MSG extends IMessage> void sendToServer(MSG message) {
@@ -26,5 +35,15 @@ public final class ModMessages {
 
     public static <MSG extends IMessage> void sendToPlayer(MSG message, net.minecraft.entity.player.EntityPlayerMP player) {
         INSTANCE.sendTo(message, player);
+    }
+
+    public static void sendRulesToPlayer(net.minecraft.entity.player.EntityPlayerMP player) {
+        sendToPlayer(new PacketServerRules(
+                com.xinyihl.constructionwandlegacy.config.ConfigRuntime.getSnapshot().getWireRules()), player);
+    }
+
+    public static void sendRulesToAll() {
+        INSTANCE.sendToAll(new PacketServerRules(
+                com.xinyihl.constructionwandlegacy.config.ConfigRuntime.getSnapshot().getWireRules()));
     }
 }

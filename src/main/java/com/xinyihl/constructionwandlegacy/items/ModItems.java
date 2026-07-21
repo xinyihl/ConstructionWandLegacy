@@ -2,33 +2,28 @@ package com.xinyihl.constructionwandlegacy.items;
 
 import com.xinyihl.constructionwandlegacy.ConstructionWandLegacy;
 import com.xinyihl.constructionwandlegacy.Tags;
-import com.xinyihl.constructionwandlegacy.basics.config.ConfigServer;
-import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
 import com.xinyihl.constructionwandlegacy.items.core.ItemCoreAE;
 import com.xinyihl.constructionwandlegacy.items.core.ItemCoreAngel;
 import com.xinyihl.constructionwandlegacy.items.core.ItemCoreDestruction;
 import com.xinyihl.constructionwandlegacy.items.core.ItemCoreProjectE;
-import com.xinyihl.constructionwandlegacy.items.wand.ItemWand;
 import com.xinyihl.constructionwandlegacy.items.wand.ItemWandBasic;
 import com.xinyihl.constructionwandlegacy.items.wand.ItemWandInfinity;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import com.xinyihl.constructionwandlegacy.wand.WandTier;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.event.ColorHandlerEvent;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Mod.EventBusSubscriber(modid = Tags.MOD_ID)
 public final class ModItems {
+    private static final String PROJECTE_MOD_ID = "projecte";
+    private static final String AE2_MOD_ID = "appliedenergistics2";
+
     public static Item WAND_STONE;
     public static Item WAND_IRON;
     public static Item WAND_DIAMOND;
@@ -44,53 +39,28 @@ public final class ModItems {
 
     @SubscribeEvent
     public static void onRegisterItems(RegistryEvent.Register<Item> event) {
-        WAND_STONE = register(event, "stone_wand", new ItemWandBasic(new ItemStack(Blocks.COBBLESTONE)), CreativeTabs.TOOLS);
-        WAND_IRON = register(event, "iron_wand", new ItemWandBasic(new ItemStack(Items.IRON_INGOT)), CreativeTabs.TOOLS);
-        WAND_DIAMOND = register(event, "diamond_wand", new ItemWandBasic(new ItemStack(Items.DIAMOND)), CreativeTabs.TOOLS);
+        WAND_STONE = register(event, "stone_wand", new ItemWandBasic(WandTier.STONE, new ItemStack(Blocks.COBBLESTONE)), CreativeTabs.TOOLS);
+        WAND_IRON = register(event, "iron_wand", new ItemWandBasic(WandTier.IRON, new ItemStack(Items.IRON_INGOT)), CreativeTabs.TOOLS);
+        WAND_DIAMOND = register(event, "diamond_wand", new ItemWandBasic(WandTier.DIAMOND, new ItemStack(Items.DIAMOND)), CreativeTabs.TOOLS);
         WAND_INFINITY = register(event, "infinity_wand", new ItemWandInfinity(), CreativeTabs.TOOLS);
 
         CORE_ANGEL = register(event, "core_angel", new ItemCoreAngel(), CreativeTabs.MISC);
         CORE_DESTRUCTION = register(event, "core_destruction", new ItemCoreDestruction(), CreativeTabs.MISC);
 
-        if (Loader.isModLoaded("projecte")) {
+        if (isProjectECoreEnabled()) {
             CORE_PROJECTE = register(event, "core_projecte", new ItemCoreProjectE(), CreativeTabs.MISC);
         }
-        if (Loader.isModLoaded("appliedenergistics2")) {
+        if (isAE2CoreEnabled()) {
             CORE_AE = register(event, "core_ae", new ItemCoreAE(), CreativeTabs.MISC);
         }
-
-        ConfigServer.registerWandProperties(WAND_STONE, new ConfigServer.WandProperties(9, 131, 16, 9, true));
-        ConfigServer.registerWandProperties(WAND_IRON, new ConfigServer.WandProperties(27, 250, 32, 27, true));
-        ConfigServer.registerWandProperties(WAND_DIAMOND, new ConfigServer.WandProperties(81, 1561, 64, 81, true));
-        ConfigServer.registerWandProperties(WAND_INFINITY, new ConfigServer.WandProperties(256, Integer.MAX_VALUE, 128, 256, true));
     }
 
-    @SubscribeEvent
-    public static void onModelRegistry(ModelRegistryEvent event) {
-        registerModel(WAND_STONE);
-        registerModel(WAND_IRON);
-        registerModel(WAND_DIAMOND);
-        registerModel(WAND_INFINITY);
-        registerModel(CORE_ANGEL);
-        registerModel(CORE_DESTRUCTION);
-
-        if (Loader.isModLoaded("projecte")) {
-            registerModel(CORE_PROJECTE);
-        }
-        if (Loader.isModLoaded("appliedenergistics2")) {
-            registerModel(CORE_AE);
-        }
+    public static boolean isProjectECoreEnabled() {
+        return Loader.isModLoaded(PROJECTE_MOD_ID);
     }
 
-    @SubscribeEvent
-    @SideOnly(Side.CLIENT)
-    public static void onItemColor(ColorHandlerEvent.Item event) {
-        event.getItemColors().registerItemColorHandler((stack, tintIndex) -> {
-            if (!(stack.getItem() instanceof ItemWand) || tintIndex != 1) {
-                return -1;
-            }
-            return new WandOptions(stack).cores.get().getColor();
-        }, WAND_STONE, WAND_IRON, WAND_DIAMOND, WAND_INFINITY);
+    public static boolean isAE2CoreEnabled() {
+        return Loader.isModLoaded(AE2_MOD_ID);
     }
 
     private static Item register(RegistryEvent.Register<Item> event, String name, Item item, CreativeTabs tab) {
@@ -99,13 +69,5 @@ public final class ModItems {
         item.setCreativeTab(tab);
         event.getRegistry().register(item);
         return item;
-    }
-
-    private static void registerModel(Item item) {
-        if (item == null || item.getRegistryName() == null) {
-            return;
-        }
-        ModelLoader.setCustomModelResourceLocation(item, 0,
-                new ModelResourceLocation(item.getRegistryName(), "inventory"));
     }
 }

@@ -1,9 +1,8 @@
 package com.xinyihl.constructionwandlegacy.crafting;
 
-import com.xinyihl.constructionwandlegacy.api.IWandUpgrade;
-import com.xinyihl.constructionwandlegacy.basics.config.ConfigServer;
-import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
+import com.xinyihl.constructionwandlegacy.basics.option.WandDataCodec;
 import com.xinyihl.constructionwandlegacy.items.wand.ItemWand;
+import com.xinyihl.constructionwandlegacy.wand.upgrade.IWandUpgrade;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
@@ -41,8 +40,7 @@ public class RecipeWandUpgrade extends IForgeRegistryEntry.Impl<IRecipe> impleme
             return false;
         }
 
-        WandOptions options = new WandOptions(wand);
-        return !options.hasUpgrade(upgrade) && ConfigServer.getWandProperties(wand.getItem()).isUpgradeable();
+        return !WandDataCodec.read(wand).hasUpgrade(upgrade);
     }
 
     @Override
@@ -69,8 +67,7 @@ public class RecipeWandUpgrade extends IForgeRegistryEntry.Impl<IRecipe> impleme
 
         ItemStack result = wand.copy();
         result.setCount(1);
-        new WandOptions(result).addUpgrade(upgrade);
-        return result;
+        return WandDataCodec.addUpgrade(result, upgrade) ? result : ItemStack.EMPTY;
     }
 
     @Override

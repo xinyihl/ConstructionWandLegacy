@@ -1,16 +1,18 @@
 package com.xinyihl.constructionwandlegacy.items.wand;
 
-import appeng.tile.networking.TileController;
 import com.xinyihl.constructionwandlegacy.ConstructionWandLegacy;
 import com.xinyihl.constructionwandlegacy.Tags;
-import com.xinyihl.constructionwandlegacy.api.IWandCore;
-import com.xinyihl.constructionwandlegacy.basics.option.IOption;
-import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
-import com.xinyihl.constructionwandlegacy.compat.inventory.handlers.HandlerAE;
-import com.xinyihl.constructionwandlegacy.compat.inventory.handlers.HandlerContainer;
+import com.xinyihl.constructionwandlegacy.basics.option.WandDataCodec;
+import com.xinyihl.constructionwandlegacy.basics.option.WandOption;
+import com.xinyihl.constructionwandlegacy.basics.option.WandState;
+import com.xinyihl.constructionwandlegacy.compat.CompatRegistrar;
 import com.xinyihl.constructionwandlegacy.items.core.CoreDefault;
-import com.xinyihl.constructionwandlegacy.items.core.ItemCoreAE;
-import com.xinyihl.constructionwandlegacy.wand.WandJob;
+import com.xinyihl.constructionwandlegacy.material.source.BoundContainerSourceFactory;
+import com.xinyihl.constructionwandlegacy.wand.WandContext;
+import com.xinyihl.constructionwandlegacy.wand.WandPlan;
+import com.xinyihl.constructionwandlegacy.wand.WandSpec;
+import com.xinyihl.constructionwandlegacy.wand.WandTier;
+import com.xinyihl.constructionwandlegacy.wand.upgrade.IWandCore;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,44 +32,45 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class ItemWand extends Item {
-    protected ItemWand() {
+    private final WandTier tier;
+
+    protected ItemWand(WandTier tier) {
+        this.tier = Objects.requireNonNull(tier, "tier");
         setMaxStackSize(1);
         addPropertyOverride(ConstructionWandLegacy.loc("using_core"), (stack, worldIn, entityIn) -> hasCustomCore(stack) ? 1.0F : 0.0F);
+    }
+
+    public final WandTier getTier() {
+        return tier;
+    }
+
+    public final WandSpec getSpec() {
+        return tier.getSpec();
+    }
+
+    public final int getPlacementLimit() {
+        return tier.getConfiguredPlacementLimit();
     }
 
     private static boolean hasCustomCore(ItemStack stack) {
         if (stack.isEmpty()) {
             return false;
         }
-        WandOptions options = new WandOptions(stack);
-        return options.cores.get().getColor() > -1;
-    }
-
-    @Optional.Method(modid = "appliedenergistics2")
-    private boolean bindAE(ItemStack stack, EntityPlayer player, World world, BlockPos pos) {
-        WandOptions options = new WandOptions(stack);
-        if (options.cores.get() instanceof ItemCoreAE) {
-            TileEntity tile = world.getTileEntity(pos);
-            if (tile instanceof TileController) {
-                HandlerAE.storeBinding(options, pos, world.provider.getDimension());
-                player.sendStatusMessage(new TextComponentTranslation(Tags.MOD_ID + ".option.cores." + options.cores.get().getRegistryName().toString() + ".bound"), true);
-                return true;
-            }
-        }
-        return false;
+        return WandDataCodec.read(stack).getSelectedCore().getColor() > -1;
     }
 
     private boolean bindContainer(ItemStack stack, EntityPlayer player, World world, BlockPos pos) {
-        WandOptions options = new WandOptions(stack);
+        WandState state = WandDataCodec.read(stack);
         // Only default core supports container binding
-        if (!(options.cores.get() instanceof CoreDefault)) {
+        if (!(state.getSelectedCore() instanceof CoreDefault)) {
             return false;
         }
         TileEntity tile = world.getTileEntity(pos);
@@ -75,24 +78,19 @@ public abstract class ItemWand extends Item {
         if (!tile.hasCapability(net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)) {
             return false;
         }
-        HandlerContainer.storeBinding(options, pos, world.provider.getDimension());
+        BoundContainerSourceFactory.storeBinding(stack, pos, world.provider.getDimension());
         player.sendStatusMessage(new TextComponentTranslation(Tags.MOD_ID + ".tooltip.container_bound"), true);
         return true;
     }
 
-    public static void optionMessage(IOption<?> option, List<String> out) {
-        out.add(TextFormatting.AQUA + I18n.translateToLocal(option.getKeyTranslation())
-                + TextFormatting.WHITE + I18n.translateToLocal(option.getValueTranslation()));
-    }
-
-    public static void optionMessage(EntityPlayer player, IOption<?> option) {
+    public static void optionMessage(EntityPlayer player, WandOption option, WandState state) {
         ITextComponent key = new TextComponentTranslation(option.getKeyTranslation());
         key.getStyle().setColor(TextFormatting.AQUA);
 
-        ITextComponent value = new TextComponentTranslation(option.getValueTranslation());
+        ITextComponent value = new TextComponentTranslation(option.getValueTranslation(state));
         value.getStyle().setColor(TextFormatting.WHITE);
 
-        ITextComponent desc = new TextComponentTranslation(option.getDescTranslation());
+        ITextComponent desc = new TextComponentTranslation(option.getDescriptionTranslation(state));
         desc.getStyle().setColor(TextFormatting.WHITE);
 
         key.appendSibling(value);
@@ -115,10 +113,8 @@ public abstract class ItemWand extends Item {
 
         ItemStack stack = player.getHeldItem(hand);
 
-        if (Loader.isModLoaded("appliedenergistics2")) {
-            if (bindAE(stack, player, world, pos)) {
-                return EnumActionResult.SUCCESS;
-            }
+        if (CompatRegistrar.tryBindAE(stack, player, world, pos)) {
+            return EnumActionResult.SUCCESS;
         }
 
         if (player.isSneaking() && bindContainer(stack, player, world, pos)) {
@@ -126,13 +122,13 @@ public abstract class ItemWand extends Item {
         }
 
         if (player.isSneaking()) {
-            return ConstructionWandLegacy.instance.undoHistory.undo(player) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
+            return ConstructionWandLegacy.instance.getRuntime().getUndoService().undo(player)
+                    ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
         }
 
         RayTraceResult hitResult = new RayTraceResult(new Vec3d(pos).add(hitX, hitY, hitZ), facing, pos);
-        WandJob job = new WandJob(player, world, hitResult, stack);
-        job.getSnapshots();
-        return job.doIt() ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
+        return executeWand(player, world, hitResult, stack)
+                ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
     }
 
     @Override
@@ -150,42 +146,51 @@ public abstract class ItemWand extends Item {
                 player.getPositionEyes(1.0F),
                 EnumFacing.getFacingFromVector((float) player.getLookVec().x, (float) player.getLookVec().y, (float) player.getLookVec().z),
                 player.getPosition());
-        WandJob job = new WandJob(player, world, miss, stack);
-        job.getSnapshots();
-        return new ActionResult<>(job.doIt() ? EnumActionResult.SUCCESS : EnumActionResult.FAIL, stack);
+        return new ActionResult<>(executeWand(player, world, miss, stack)
+                ? EnumActionResult.SUCCESS : EnumActionResult.FAIL, stack);
+    }
+
+    private static boolean executeWand(EntityPlayer player, World world, RayTraceResult hit, ItemStack wand) {
+        WandContext context = WandContext.create(player, world, hit, wand);
+        WandPlan plan = ConstructionWandLegacy.instance.getRuntime().getWandPlanner().plan(context);
+        return ConstructionWandLegacy.instance.getRuntime().getWandExecutor()
+                .execute(context, plan).isSuccess();
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        WandOptions options = new WandOptions(stack);
-        int limit = options.cores.get().getWandAction().getLimit(stack);
+        WandState state = WandDataCodec.read(stack);
+        int limit = state.getSelectedCore().getWandAction().getLimit(stack);
         if (GuiScreen.isShiftKeyDown()) {
-            for (int i = 1; i < options.allOptions.length; i++) {
-                IOption<?> option = options.allOptions[i];
+            for (WandOption option : WandOption.values()) {
+                if (option == WandOption.CORES) {
+                    continue;
+                }
                 tooltip.add(TextFormatting.AQUA + I18n.translateToLocal(option.getKeyTranslation())
-                        + TextFormatting.GRAY + I18n.translateToLocal(option.getValueTranslation()));
+                        + TextFormatting.GRAY + I18n.translateToLocal(option.getValueTranslation(state)));
             }
 
-            if (!options.cores.getUpgrades().isEmpty()) {
+            if (!state.getCores().isEmpty()) {
                 tooltip.add("");
                 tooltip.add(TextFormatting.GRAY + I18n.translateToLocal(Tags.MOD_ID + ".tooltip.cores"));
-                for (IWandCore core : options.cores.getUpgrades()) {
-                    tooltip.add(I18n.translateToLocal(options.cores.getKeyTranslation() + "." + core.getRegistryName().toString()));
+                for (IWandCore core : state.getCores()) {
+                    tooltip.add(I18n.translateToLocal(
+                            WandOption.CORES.getKeyTranslation() + "." + core.getRegistryName().toString()));
                 }
             }
 
             // Show binding status
-            if (options.cores.get() instanceof ItemCoreAE && HandlerAE.hasBinding(options)) {
+            if (CompatRegistrar.hasAE2Binding(stack, state.getSelectedCore())) {
                 tooltip.add(TextFormatting.GREEN + I18n.translateToLocal(Tags.MOD_ID + ".tooltip.ae_bound"));
             }
-            if (options.cores.get() instanceof CoreDefault && HandlerContainer.hasBinding(options)) {
+            if (state.getSelectedCore() instanceof CoreDefault && BoundContainerSourceFactory.hasBinding(stack)) {
                 tooltip.add(TextFormatting.GREEN + I18n.translateToLocal(Tags.MOD_ID + ".tooltip.container_bound"));
             }
         } else {
             tooltip.add(TextFormatting.GRAY + String.format(I18n.translateToLocal(Tags.MOD_ID + ".tooltip.blocks"), limit));
-            IOption<?> coreOption = options.allOptions[0];
-            tooltip.add(TextFormatting.AQUA + I18n.translateToLocal(coreOption.getKeyTranslation())
-                    + TextFormatting.WHITE + I18n.translateToLocal(coreOption.getValueTranslation()));
+            tooltip.add(TextFormatting.AQUA + I18n.translateToLocal(WandOption.CORES.getKeyTranslation())
+                    + TextFormatting.WHITE + I18n.translateToLocal(WandOption.CORES.getValueTranslation(state)));
             tooltip.add(TextFormatting.AQUA + I18n.translateToLocal(Tags.MOD_ID + ".tooltip.shift"));
         }
     }

@@ -1,7 +1,7 @@
 package com.xinyihl.constructionwandlegacy.items.core;
 
-import com.xinyihl.constructionwandlegacy.api.IWandAction;
 import com.xinyihl.constructionwandlegacy.wand.action.ActionDestruction;
+import com.xinyihl.constructionwandlegacy.wand.action.WandAction;
 
 public class ItemCoreDestruction extends ItemCore {
     @Override
@@ -10,7 +10,7 @@ public class ItemCoreDestruction extends ItemCore {
     }
 
     @Override
-    public IWandAction getWandAction() {
-        return new ActionDestruction();
+    public WandAction getWandAction() {
+        return ActionDestruction.INSTANCE;
     }
 }

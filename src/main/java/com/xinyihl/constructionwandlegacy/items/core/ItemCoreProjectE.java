@@ -1,11 +1,9 @@
 package com.xinyihl.constructionwandlegacy.items.core;
 
-import com.xinyihl.constructionwandlegacy.api.IWandAction;
-import com.xinyihl.constructionwandlegacy.api.IWandSupplier;
-import com.xinyihl.constructionwandlegacy.basics.option.WandOptions;
+import com.xinyihl.constructionwandlegacy.compat.CompatRegistrar;
+import com.xinyihl.constructionwandlegacy.material.MaterialSourceFactory;
 import com.xinyihl.constructionwandlegacy.wand.action.ActionConstruction;
-import com.xinyihl.constructionwandlegacy.wand.supplier.SupplierProjectE;
-import net.minecraft.entity.player.EntityPlayer;
+import com.xinyihl.constructionwandlegacy.wand.action.WandAction;
 
 public class ItemCoreProjectE extends ItemCore {
     @Override
@@ -14,12 +12,12 @@ public class ItemCoreProjectE extends ItemCore {
     }
 
     @Override
-    public IWandAction getWandAction() {
-        return new ActionConstruction();
+    public WandAction getWandAction() {
+        return ActionConstruction.INSTANCE;
     }
 
     @Override
-    public IWandSupplier createSupplier(EntityPlayer player, WandOptions options) {
-        return new SupplierProjectE(player, options);
+    public MaterialSourceFactory getMaterialSourceFactory() {
+        return CompatRegistrar.getProjectEMaterialSourceFactory();
     }
 }
