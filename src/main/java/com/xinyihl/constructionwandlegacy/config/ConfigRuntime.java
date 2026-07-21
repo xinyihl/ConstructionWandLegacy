@@ -1,10 +1,13 @@
 package com.xinyihl.constructionwandlegacy.config;
 
 import com.xinyihl.constructionwandlegacy.registry.BlockEquivalenceIndex;
+import com.xinyihl.constructionwandlegacy.wand.WandTier;
+
+import java.util.Collections;
 
 public final class ConfigRuntime {
     private static long revision;
-    private static volatile Snapshot current = compile(RuleSnapshot.create(0L, 9, 27, 81, 256, false, java.util.Collections.emptyList(), java.util.Collections.emptyList(), java.util.Collections.emptyList(), java.util.Collections.emptyList()));
+    private static volatile Snapshot current = compile(RuleSnapshot.create(0L, 9, 27, 81, 256, false, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
 
     private ConfigRuntime() {
     }
@@ -50,7 +53,7 @@ public final class ConfigRuntime {
             return wireRules.getRevision();
         }
 
-        public int getPlacementLimit(com.xinyihl.constructionwandlegacy.wand.WandTier tier) {
+        public int getPlacementLimit(WandTier tier) {
             return wireRules.getPlacementLimit(tier);
         }
 

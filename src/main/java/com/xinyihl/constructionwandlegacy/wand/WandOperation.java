@@ -31,6 +31,7 @@ public interface WandOperation {
         private final String message;
         @Nullable
         private final RuntimeException cause;
+
         private RollbackResult(Status status, @Nullable String message, @Nullable RuntimeException cause) {
             this.status = status;
             this.message = message;
@@ -82,6 +83,7 @@ public interface WandOperation {
         private final String message;
         @Nullable
         private final RuntimeException cause;
+
         private ApplyResult(Status status, @Nullable AppliedChange change, @Nullable RollbackResult rollbackResult, @Nullable String message, @Nullable RuntimeException cause) {
             this.status = status;
             this.change = change;

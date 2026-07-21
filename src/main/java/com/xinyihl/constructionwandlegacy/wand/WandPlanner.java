@@ -74,7 +74,7 @@ public final class WandPlanner {
         WandAction action = context.getState().getSelectedCore().getWandAction();
         int limit = operationLimit(context, action);
         if (limit <= 0) {
-            return new WandPlan(java.util.Collections.emptyList());
+            return new WandPlan(Collections.emptyList());
         }
 
         MaterialSourceFactory coreFactory = context.getState().getSelectedCore().getMaterialSourceFactory();
@@ -95,7 +95,7 @@ public final class WandPlanner {
         } catch (RuntimeException exception) {
             resolver.cancelReservations();
             logger.warn("Failed to plan wand operation", exception);
-            return new WandPlan(java.util.Collections.emptyList());
+            return new WandPlan(Collections.emptyList());
         }
     }
 

@@ -3,6 +3,7 @@ package com.xinyihl.constructionwandlegacy.wand;
 import com.xinyihl.constructionwandlegacy.material.MaterialReceipt;
 import com.xinyihl.constructionwandlegacy.material.MaterialReservation;
 import com.xinyihl.constructionwandlegacy.wand.undo.UndoService;
+import net.minecraft.util.math.BlockPos;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
@@ -115,7 +116,7 @@ public final class WandExecutor {
         }
     }
 
-    private void recoverWorldThenRefund(WandOperation.AppliedChange change, @Nullable MaterialReceipt receipt, net.minecraft.util.math.BlockPos pos, ExecutionAccess access) {
+    private void recoverWorldThenRefund(WandOperation.AppliedChange change, @Nullable MaterialReceipt receipt, BlockPos pos, ExecutionAccess access) {
         WandOperation.RollbackResult worldResult;
         try {
             worldResult = access.rollback(change);
@@ -142,7 +143,7 @@ public final class WandExecutor {
         }
     }
 
-    private void logRecoveryFailure(net.minecraft.util.math.BlockPos pos, WandOperation.RollbackResult result) {
+    private void logRecoveryFailure(BlockPos pos, WandOperation.RollbackResult result) {
         if (result.getCause() == null) {
             logger.error("World rollback at {} was not completed: {}", pos, result.getMessage());
         } else {

@@ -1,5 +1,7 @@
 package com.xinyihl.constructionwandlegacy.network;
 
+import com.xinyihl.constructionwandlegacy.config.ConfigRuntime;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -29,15 +31,15 @@ public final class ModMessages {
         INSTANCE.sendToServer(message);
     }
 
-    public static <MSG extends IMessage> void sendToPlayer(MSG message, net.minecraft.entity.player.EntityPlayerMP player) {
+    public static <MSG extends IMessage> void sendToPlayer(MSG message, EntityPlayerMP player) {
         INSTANCE.sendTo(message, player);
     }
 
-    public static void sendRulesToPlayer(net.minecraft.entity.player.EntityPlayerMP player) {
-        sendToPlayer(new PacketServerRules(com.xinyihl.constructionwandlegacy.config.ConfigRuntime.getSnapshot().getWireRules()), player);
+    public static void sendRulesToPlayer(EntityPlayerMP player) {
+        sendToPlayer(new PacketServerRules(ConfigRuntime.getSnapshot().getWireRules()), player);
     }
 
     public static void sendRulesToAll() {
-        INSTANCE.sendToAll(new PacketServerRules(com.xinyihl.constructionwandlegacy.config.ConfigRuntime.getSnapshot().getWireRules()));
+        INSTANCE.sendToAll(new PacketServerRules(ConfigRuntime.getSnapshot().getWireRules()));
     }
 }

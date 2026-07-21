@@ -38,6 +38,7 @@ public final class PreviewKey {
     private final NBTTagCompound wandTag;
     private final String stateSignature;
     private final long rulesRevision;
+
     private PreviewKey(Mode mode, int dimension, long worldTick, double playerX, double playerY, double playerZ, double lookX, double lookY, double lookZ, BlockPos targetPos, @Nullable EnumFacing targetSide, EnumHand hand, int slot, Item wandItem, int wandDamage, @Nullable NBTTagCompound wandTag, String stateSignature, long rulesRevision) {
         this.mode = Objects.requireNonNull(mode, "mode");
         this.dimension = dimension;

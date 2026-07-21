@@ -53,7 +53,7 @@ public final class UndoService {
     public boolean retryPending(EntityPlayer player) {
         PlayerEntry entry = getEntry(player.getUniqueID());
         boolean changed = false;
-        java.util.Iterator<PendingEntry> iterator = entry.pending.iterator();
+        Iterator<PendingEntry> iterator = entry.pending.iterator();
         while (iterator.hasNext()) {
             PendingEntry pending = iterator.next();
             if (pending.dimension != player.world.provider.getDimension()) {

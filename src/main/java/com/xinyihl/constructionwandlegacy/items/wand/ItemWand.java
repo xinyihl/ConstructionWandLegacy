@@ -34,6 +34,7 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.CapabilityItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -98,7 +99,7 @@ public abstract class ItemWand extends Item {
         }
         TileEntity tile = world.getTileEntity(pos);
         if (tile == null) return false;
-        if (!tile.hasCapability(net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)) {
+        if (!tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)) {
             return false;
         }
         BoundContainerSourceFactory.storeBinding(stack, pos, world.provider.getDimension());
