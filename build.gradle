@@ -36,7 +36,10 @@ minecraft {
     username = 'Developer'
     
     // Add various JVM arguments here for runtime
-    def args = ["-ea:${project.group}"]
+    def args = [
+            "-ea:${project.group}",
+            "-Dfml.coreMods.load=com.xinyihl.constructionwandlegacy.coremod.LightingCorePlugin"
+    ]
     extraRunJvmArguments.addAll(args)
 
     // Include and use dependencies' Access Transformer files
@@ -119,4 +122,13 @@ idea {
 
 tasks.named("processIdeaSettings").configure {
     dependsOn("injectTags")
+}
+
+jar {
+    manifest {
+        attributes(
+                'FMLCorePlugin': 'com.xinyihl.constructionwandlegacy.coremod.LightingCorePlugin',
+                'FMLCorePluginContainsFMLMod': 'true'
+        )
+    }
 }

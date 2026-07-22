@@ -2,6 +2,7 @@ package com.xinyihl.constructionwandlegacy.wand;
 
 import com.xinyihl.constructionwandlegacy.material.MaterialReceipt;
 import com.xinyihl.constructionwandlegacy.material.MaterialReservation;
+import com.xinyihl.constructionwandlegacy.lighting.DeferredLightingBatch;
 import com.xinyihl.constructionwandlegacy.wand.undo.UndoService;
 import net.minecraft.util.math.BlockPos;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +35,9 @@ public final class WandExecutor {
     }
 
     public ExecutionResult execute(WandContext context, WandPlan plan) {
-        return execute(context, plan, new ContextAccess(context));
+        try (DeferredLightingBatch ignored = DeferredLightingBatch.begin(context.getWorld())) {
+            return execute(context, plan, new ContextAccess(context));
+        }
     }
 
     ExecutionResult execute(@Nullable WandContext context, WandPlan plan, ExecutionAccess access) {

@@ -70,6 +70,7 @@ Minecraft 1.12.2 上的 Construction Wand 功能回移植（Forge）。
 - `placement.blockWhitelist`：放置白名单（为空表示不启用白名单）
 - `placement.blockBlacklist`：放置黑名单
 - `placement.propertyCopyWhitelist`：`TARGET` 模式下允许复制的属性名关键字白名单（如 `facing`、`axis`）
+- `performance.deferredLightingUpdates`：在一次手杖执行期间合并逐方块区块光照更新的实验性优化（默认关闭，修改后需要完整重启）
 - `matching.similarBlocks`：在 `SIMILAR` 模式下视为等价的方块分组
 
 白名单/黑名单条目格式：
@@ -110,6 +111,10 @@ matching {
   S:similarBlocks <
     minecraft:dirt;minecraft:grass
    >
+}
+
+performance {
+  B:deferredLightingUpdates=false
 }
 
 wandLimits {

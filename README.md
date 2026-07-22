@@ -70,6 +70,7 @@ A config file is generated after first launch at `config/ConstructionWandLegacy.
 - `placement.blockWhitelist`: placement whitelist (empty means whitelist disabled)
 - `placement.blockBlacklist`: placement blacklist
 - `placement.propertyCopyWhitelist`: keyword whitelist of property names allowed to copy in `TARGET` mode (e.g. `facing`, `axis`)
+- `performance.deferredLightingUpdates`: experimental coalescing of per-block chunk lighting updates during wand execution (disabled by default; requires a full restart)
 - `matching.similarBlocks`: groups of blocks treated as equivalent in `SIMILAR` mode
 
 Whitelist/blacklist entry formats:
@@ -110,6 +111,10 @@ matching {
   S:similarBlocks <
     minecraft:dirt;minecraft:grass
    >
+}
+
+performance {
+  B:deferredLightingUpdates=false
 }
 
 wandLimits {

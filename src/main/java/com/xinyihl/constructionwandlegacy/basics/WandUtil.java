@@ -84,22 +84,18 @@ public final class WandUtil {
 
         ItemStack stack = placeStack.copy();
         stack.setCount(1);
-        IBlockState placedAgainst = world.getBlockState(pos.offset(facing.getOpposite()));
-        BlockSnapshot snapshot = BlockSnapshot.getBlockSnapshot(world, pos);
+
+        BlockEvent.EntityPlaceEvent placeEvent = new BlockEvent.EntityPlaceEvent(BlockSnapshot.getBlockSnapshot(world, pos), world.getBlockState(pos.offset(facing.getOpposite())), player);
+        MinecraftForge.EVENT_BUS.post(placeEvent);
+
+        if (placeEvent.isCanceled()) {
+            return false;
+        }
 
         if (!item.placeBlockAt(stack, player, world, pos, facing, hitX, hitY, hitZ, state)) {
             return false;
         }
 
-        BlockEvent.EntityPlaceEvent placeEvent = new BlockEvent.EntityPlaceEvent(snapshot, placedAgainst, player);
-        MinecraftForge.EVENT_BUS.post(placeEvent);
-        if (placeEvent.isCanceled()) {
-            world.setBlockState(pos, snapshot.getReplacedBlock(), 3);
-            return false;
-        }
-
-        IBlockState placed = world.getBlockState(pos);
-        placed.getBlock().onBlockPlacedBy(world, pos, placed, player, stack);
         return true;
     }
 

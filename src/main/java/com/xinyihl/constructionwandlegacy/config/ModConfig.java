@@ -14,6 +14,9 @@ public final class ModConfig {
     @Config.Name("matching")
     public static final Matching matching = new Matching();
 
+    @Config.Name("performance")
+    public static final Performance performance = new Performance();
+
     private ModConfig() {
     }
 
@@ -52,5 +55,15 @@ public final class ModConfig {
     public static final class Matching {
         @Config.Comment("Similar block matching groups for SIMILAR mode, entries separated by ';', e.g. minecraft:dirt;minecraft:grass")
         public String[] similarBlocks = new String[0];
+    }
+
+    public static final class Performance {
+        @Config.Comment({
+                "Defer Chunk height-map and skylight-column updates while a wand executes, then merge them per column.",
+                "Experimental: keep disabled unless large wand operations spend significant time in Chunk.relightBlock.",
+                "Changing this option requires a full game or server restart so the Chunk Coremod can be applied safely."
+        })
+        @Config.RequiresMcRestart
+        public boolean deferredLightingUpdates = false;
     }
 }
