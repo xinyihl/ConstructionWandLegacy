@@ -129,7 +129,7 @@ wandLimits {
 
 未安装 AE2、ProjectE 或 Baubles 时，ConstructionWandLegacy 仍可独立运行。可选核心的物品、模型和配方只会在对应模组已加载时注册。
 
-- AE 兼容使用 `appliedenergistics2` 模组 ID，当前构建依赖基于 AE2 Extended Life。
+- AE 兼容使用 `ae2` 模组 ID，当前构建依赖基于 Applied Energistics 2 Supergiant。
 - ProjectE 兼容使用 `projecte` 模组 ID。
 - Baubles 兼容使用 `baubles` 模组 ID，仅增加额外材料来源，不增加核心。
 

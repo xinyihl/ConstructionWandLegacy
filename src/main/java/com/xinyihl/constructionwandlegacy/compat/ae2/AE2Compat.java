@@ -1,6 +1,6 @@
 package com.xinyihl.constructionwandlegacy.compat.ae2;
 
-import appeng.tile.networking.TileController;
+import ae2.tile.networking.TileController;
 import com.xinyihl.constructionwandlegacy.basics.option.WandDataCodec;
 import com.xinyihl.constructionwandlegacy.material.MaterialSourceFactory;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,7 +24,7 @@ public final class AE2Compat {
         return FactoryHolder.MATERIAL_SOURCE_FACTORY;
     }
 
-    @Optional.Method(modid = "appliedenergistics2")
+    @Optional.Method(modid = "ae2")
     public static boolean tryBind(ItemStack wand, EntityPlayer player, World world, BlockPos pos) {
         if (wand == null || wand.isEmpty() || player == null || world == null || pos == null) {
             return false;

@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
 public final class CompatRegistrar {
     private static final String BAUBLES_MOD_ID = "baubles";
     private static final String PROJECTE_MOD_ID = "projecte";
-    private static final String AE2_MOD_ID = "appliedenergistics2";
+    private static final String AE2_MOD_ID = "ae2";
 
     private CompatRegistrar() {
     }

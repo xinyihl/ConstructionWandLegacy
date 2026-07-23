@@ -1,21 +1,14 @@
 package com.xinyihl.constructionwandlegacy.compat.ae2;
 
-import appeng.api.AEApi;
-import appeng.api.config.Actionable;
-import appeng.api.config.SecurityPermissions;
-import appeng.api.networking.IGrid;
-import appeng.api.networking.IGridNode;
-import appeng.api.networking.security.IActionSource;
-import appeng.api.networking.security.ISecurityGrid;
-import appeng.api.networking.storage.IStorageGrid;
-import appeng.api.storage.IMEMonitor;
-import appeng.api.storage.channels.IItemStorageChannel;
-import appeng.api.storage.data.IAEItemStack;
-import appeng.api.storage.data.IItemList;
-import appeng.me.GridAccessException;
-import appeng.me.helpers.MachineSource;
-import appeng.tile.networking.TileController;
-import appeng.util.item.AEItemStack;
+import ae2.api.config.Actionable;
+import ae2.api.networking.IGrid;
+import ae2.api.networking.IGridNode;
+import ae2.api.networking.security.IActionSource;
+import ae2.api.stacks.AEItemKey;
+import ae2.api.stacks.AEKey;
+import ae2.api.stacks.KeyCounter;
+import ae2.api.storage.MEStorage;
+import ae2.tile.networking.TileController;
 import com.xinyihl.constructionwandlegacy.ConstructionWandLegacy;
 import com.xinyihl.constructionwandlegacy.material.*;
 import com.xinyihl.constructionwandlegacy.material.source.InventoryRefunds;
@@ -31,16 +24,15 @@ import javax.annotation.Nullable;
 
 public final class AE2MaterialSourceFactory implements MaterialSourceFactory {
     @Nullable
-    @Optional.Method(modid = "appliedenergistics2")
+    @Optional.Method(modid = "ae2")
     private static MaterialSource createSource(EntityPlayer player, World world, BlockPos pos, TileController controller, IGrid grid, IActionSource actionSource) {
-        IStorageGrid storageGrid = grid.getCache(IStorageGrid.class);
-        IMEMonitor<IAEItemStack> storage = storageGrid.getInventory(AEApi.instance().storage().getStorageChannel(IItemStorageChannel.class));
+        MEStorage storage = grid.getStorageService().getInventory();
         return storage == null ? null : new AE2MaterialSource(player, world, pos, controller, grid, storage, actionSource);
     }
 
     @Nullable
     @Override
-    @Optional.Method(modid = "appliedenergistics2")
+    @Optional.Method(modid = "ae2")
     public MaterialSource create(EntityPlayer player, ItemStack wand) {
         AE2Compat.Binding binding = AE2Compat.readBinding(wand);
         if (binding == null) {
@@ -57,13 +49,12 @@ public final class AE2MaterialSourceFactory implements MaterialSourceFactory {
         }
         TileController controller = (TileController) tile;
         try {
-            ISecurityGrid security = controller.getProxy().getSecurity();
-            IGridNode node = controller.getGridNode(null);
-            if (node == null || !security.hasPermission(player, SecurityPermissions.EXTRACT)) {
+            IGridNode node = controller.getMainNode().getNode();
+            if (node == null || !node.isActive()) {
                 return null;
             }
-            return createSource(player, boundWorld, boundPos, controller, node.getGrid(), new MachineSource(controller));
-        } catch (GridAccessException exception) {
+            return createSource(player, boundWorld, boundPos, controller, node.grid(), IActionSource.ofPlayer(player, controller));
+        } catch (RuntimeException exception) {
             if (ConstructionWandLegacy.LOGGER != null) {
                 ConstructionWandLegacy.LOGGER.debug("Unable to resolve bound AE2 grid", exception);
             }
@@ -79,10 +70,10 @@ public final class AE2MaterialSourceFactory implements MaterialSourceFactory {
         private final BlockPos pos;
         private final TileController controller;
         private final IGrid grid;
-        private final IMEMonitor<IAEItemStack> storage;
+        private final MEStorage storage;
         private final IActionSource actionSource;
 
-        private AE2MaterialSource(EntityPlayer player, World world, BlockPos pos, TileController controller, IGrid grid, IMEMonitor<IAEItemStack> storage, IActionSource actionSource) {
+        private AE2MaterialSource(EntityPlayer player, World world, BlockPos pos, TileController controller, IGrid grid, MEStorage storage, IActionSource actionSource) {
             this.player = player;
             this.world = world;
             this.pos = pos;
@@ -98,58 +89,57 @@ public final class AE2MaterialSourceFactory implements MaterialSourceFactory {
         }
 
         @Override
-        @Optional.Method(modid = "appliedenergistics2")
+        @Optional.Method(modid = "ae2")
         public void enumerate(MaterialCollector collector) {
-            if (!isValidEndpoint(SecurityPermissions.EXTRACT)) {
+            if (!isValidEndpoint()) {
                 return;
             }
-            IItemList<IAEItemStack> itemList = storage.getStorageList();
-            if (itemList == null) {
-                return;
-            }
-            for (IAEItemStack aeStack : itemList) {
-                if (aeStack == null || SaturatedAmounts.fromLong(aeStack.getStackSize()) == 0) {
+            KeyCounter availableStacks = storage.getAvailableStacks();
+            for (AEKey aeKey : availableStacks.keySet()) {
+                if (!(aeKey instanceof AEItemKey)) {
                     continue;
                 }
-                ItemStack definition = aeStack.getDefinition();
+                long amount = availableStacks.get(aeKey);
+                if (SaturatedAmounts.fromLong(amount) == 0) {
+                    continue;
+                }
+                ItemStack definition = ((AEItemKey) aeKey).toStack();
                 if (!definition.isEmpty()) {
-                    collector.accept(MaterialKey.of(definition), aeStack.getStackSize());
+                    collector.accept(MaterialKey.of(definition), amount);
                 }
             }
         }
 
         @Override
-        @Optional.Method(modid = "appliedenergistics2")
+        @Optional.Method(modid = "ae2")
         public MaterialReceipt extract(MaterialKey key, int count) {
-            if (count <= 0 || !isValidEndpoint(SecurityPermissions.EXTRACT)) {
+            if (count <= 0 || !isValidEndpoint()) {
                 return MaterialReceipt.empty();
             }
-            IAEItemStack request = AEItemStack.fromItemStack(key.createStack(1));
+            AEItemKey request = AEItemKey.of(key.createStack(1));
             if (request == null) {
                 return MaterialReceipt.empty();
             }
-            request.setStackSize(count);
-            IAEItemStack result;
+            long result;
             try {
-                result = storage.extractItems(request, Actionable.MODULATE, actionSource);
+                result = storage.extract(request, count, Actionable.MODULATE, actionSource);
             } catch (RuntimeException exception) {
                 return MaterialReceipt.empty();
             }
-            int extracted = result == null ? 0 : Math.min(count, SaturatedAmounts.fromLong(result.getStackSize()));
+            int extracted = Math.min(count, SaturatedAmounts.fromLong(result));
             return MaterialReceipt.of(ID, key, extracted, this::refund);
         }
 
         private int refund(MaterialKey key, int count) {
-            if (!isValidEndpoint(SecurityPermissions.INJECT)) {
+            if (!isValidEndpoint()) {
                 return InventoryRefunds.refund(player, key, count);
             }
-            IAEItemStack request = AEItemStack.fromItemStack(key.createStack(1));
+            AEItemKey request = AEItemKey.of(key.createStack(1));
             int remaining = count;
             if (request != null) {
-                request.setStackSize(count);
                 try {
-                    IAEItemStack rejected = storage.injectItems(request, Actionable.MODULATE, actionSource);
-                    remaining = rejected == null ? 0 : Math.min(count, SaturatedAmounts.fromLong(rejected.getStackSize()));
+                    long inserted = storage.insert(request, count, Actionable.MODULATE, actionSource);
+                    remaining = count - Math.min(count, SaturatedAmounts.fromLong(inserted));
                 } catch (RuntimeException ignored) {
                     remaining = count;
                 }
@@ -157,19 +147,18 @@ public final class AE2MaterialSourceFactory implements MaterialSourceFactory {
             return remaining <= 0 ? 0 : InventoryRefunds.refund(player, key, remaining);
         }
 
-        @Optional.Method(modid = "appliedenergistics2")
-        private boolean isValidEndpoint(SecurityPermissions permission) {
+        @Optional.Method(modid = "ae2")
+        private boolean isValidEndpoint() {
             if (world == null || world.isRemote || !world.isBlockLoaded(pos) || world.getTileEntity(pos) != controller || controller.isInvalid()) {
                 return false;
             }
             try {
-                IGridNode node = controller.getGridNode(null);
-                if (node == null || node.getGrid() != grid || !controller.getProxy().getSecurity().hasPermission(player, permission)) {
+                IGridNode node = controller.getMainNode().getNode();
+                if (node == null || !node.isActive() || node.grid() != grid) {
                     return false;
                 }
-                IStorageGrid currentStorage = grid.getCache(IStorageGrid.class);
-                return currentStorage.getInventory(AEApi.instance().storage().getStorageChannel(IItemStorageChannel.class)) == storage;
-            } catch (GridAccessException | RuntimeException exception) {
+                return grid.getStorageService().getInventory() == storage;
+            } catch (RuntimeException exception) {
                 return false;
             }
         }

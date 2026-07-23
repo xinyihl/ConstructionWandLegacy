@@ -22,7 +22,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Mod.EventBusSubscriber(modid = Tags.MOD_ID)
 public final class ModItems {
     private static final String PROJECTE_MOD_ID = "projecte";
-    private static final String AE2_MOD_ID = "appliedenergistics2";
+    private static final String AE2_MOD_ID = "ae2";
 
     public static Item WAND_STONE;
     public static Item WAND_IRON;

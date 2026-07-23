@@ -129,7 +129,7 @@ wandLimits {
 
 ConstructionWandLegacy can run without AE2, ProjectE, or Baubles. Optional core items, models, and recipes are registered only when the corresponding mod is loaded.
 
-- AE compatibility targets the `appliedenergistics2` mod ID and is built against AE2 Extended Life.
+- AE compatibility targets the `ae2` mod ID and is built against Applied Energistics 2 Supergiant.
 - ProjectE compatibility targets the `projecte` mod ID.
 - Baubles compatibility targets the `baubles` mod ID and only adds an extra material source; it does not add a core.
 
