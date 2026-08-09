@@ -31,7 +31,7 @@ public class ClientEvents {
         return Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
     }
 
-    private static boolean modeKeyCombDown(EntityPlayer player) {
+    public static boolean modeKeyCombDown(EntityPlayer player) {
         return player.isSneaking() && isOptKeyDown();
     }
 

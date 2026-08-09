@@ -156,10 +156,11 @@ public final class PlantOperation implements WandOperation {
                 return RollbackResult.notRestored("crop is not restorable");
             }
             IBlockState current = world.getBlockState(pos);
-            if (!current.equals(before.getState())) {
-                if (!current.equals(after) || !WandUtil.removeBlock(world, player, after, pos)) {
-                    return RollbackResult.notRestored("break event rejected crop");
-                }
+            if (current.equals(before.getState())) {
+                return RollbackResult.alreadyRestored();
+            }
+            if (!current.equals(after) || !WandUtil.removeBlock(world, player, after, pos)) {
+                return RollbackResult.notRestored("break event rejected crop");
             }
             return before.restore(world, pos);
         }
