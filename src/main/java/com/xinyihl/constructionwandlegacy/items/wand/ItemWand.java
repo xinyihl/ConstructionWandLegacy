@@ -5,6 +5,7 @@ import com.xinyihl.constructionwandlegacy.Tags;
 import com.xinyihl.constructionwandlegacy.basics.option.WandDataCodec;
 import com.xinyihl.constructionwandlegacy.basics.option.WandOption;
 import com.xinyihl.constructionwandlegacy.basics.option.WandState;
+import com.xinyihl.constructionwandlegacy.client.ClientEvents;
 import com.xinyihl.constructionwandlegacy.compat.CompatRegistrar;
 import com.xinyihl.constructionwandlegacy.items.core.CoreDefault;
 import com.xinyihl.constructionwandlegacy.material.source.BoundContainerSourceFactory;
@@ -127,7 +128,7 @@ public abstract class ItemWand extends Item {
             return EnumActionResult.SUCCESS;
         }
 
-        if (player.isSneaking()) {
+        if (ClientEvents.modeKeyCombDown(player)) {
             return ConstructionWandLegacy.instance.getRuntime().getUndoService().undo(player) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
         }
 

@@ -75,12 +75,12 @@ public final class WandTransaction {
         private final WandOperation.AppliedChange change;
         private final MaterialReceipt materialReceipt;
         private boolean worldRestored;
-        private boolean materialRefunded;
+        private boolean materialSettled;
 
         private Entry(WandOperation.AppliedChange change, MaterialReceipt materialReceipt) {
             this.change = change;
             this.materialReceipt = materialReceipt;
-            this.materialRefunded = materialReceipt.getRemainingCount() == 0;
+            this.materialSettled = materialReceipt.getRemainingCount() == 0;
         }
 
         public BlockPos getPos() {
@@ -88,7 +88,7 @@ public final class WandTransaction {
         }
 
         public boolean isComplete() {
-            return worldRestored && materialRefunded;
+            return worldRestored && materialSettled;
         }
 
         /**
@@ -109,16 +109,19 @@ public final class WandTransaction {
                 }
                 worldRestored = true;
                 restoredThisAttempt = true;
+                if (!restoreResult.shouldRefundMaterial()) {
+                    materialSettled = true;
+                }
             }
 
-            if (!materialRefunded) {
+            if (!materialSettled) {
                 try {
                     materialReceipt.refund();
-                    materialRefunded = materialReceipt.getRemainingCount() == 0;
+                    materialSettled = materialReceipt.getRemainingCount() == 0;
                 } catch (RuntimeException exception) {
                     return RecoveryResult.incomplete(restoredThisAttempt, false, WandOperation.RollbackResult.failed("exception refunding transaction entry", exception));
                 }
-                if (!materialRefunded) {
+                if (!materialSettled) {
                     return RecoveryResult.incomplete(restoredThisAttempt, false, WandOperation.RollbackResult.notRestored("material refund has remaining items"));
                 }
             }
@@ -129,13 +132,13 @@ public final class WandTransaction {
 
     public static final class RecoveryResult {
         private final boolean worldChanged;
-        private final boolean materialRefunded;
+        private final boolean materialSettled;
         @Nullable
         private final WandOperation.RollbackResult failure;
 
-        private RecoveryResult(boolean worldChanged, boolean materialRefunded, @Nullable WandOperation.RollbackResult failure) {
+        private RecoveryResult(boolean worldChanged, boolean materialSettled, @Nullable WandOperation.RollbackResult failure) {
             this.worldChanged = worldChanged;
-            this.materialRefunded = materialRefunded;
+            this.materialSettled = materialSettled;
             this.failure = failure;
         }
 
@@ -147,20 +150,20 @@ public final class WandTransaction {
             return new RecoveryResult(worldChanged, complete, failure);
         }
 
-        private static RecoveryResult incomplete(boolean worldChanged, boolean materialRefunded, WandOperation.RollbackResult failure) {
-            return new RecoveryResult(worldChanged, materialRefunded, failure);
+        private static RecoveryResult incomplete(boolean worldChanged, boolean materialSettled, WandOperation.RollbackResult failure) {
+            return new RecoveryResult(worldChanged, materialSettled, failure);
         }
 
         public boolean didRestoreWorld() {
             return worldChanged;
         }
 
-        public boolean isMaterialRefunded() {
-            return materialRefunded;
+        public boolean isMaterialSettled() {
+            return materialSettled;
         }
 
         public boolean isComplete() {
-            return materialRefunded && failure == null;
+            return materialSettled && failure == null;
         }
 
         @Nullable

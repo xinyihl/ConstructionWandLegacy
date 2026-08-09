@@ -188,10 +188,11 @@ public final class PlaceOperation implements WandOperation {
                 return RollbackResult.notRestored("placed block is not restorable");
             }
             IBlockState current = world.getBlockState(pos);
-            if (!current.equals(before.getState())) {
-                if (!current.equals(after) || !WandUtil.removeBlock(world, player, after, pos)) {
-                    return RollbackResult.notRestored("break event rejected placed block");
-                }
+            if (current.equals(before.getState())) {
+                return RollbackResult.alreadyRestored();
+            }
+            if (!current.equals(after) || !WandUtil.removeBlock(world, player, after, pos)) {
+                return RollbackResult.notRestored("break event rejected placed block");
             }
             return before.restore(world, pos);
         }

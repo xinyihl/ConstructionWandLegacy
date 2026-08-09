@@ -27,27 +27,33 @@ public interface WandOperation {
 
     final class RollbackResult {
         private final Status status;
+        private final boolean refundMaterial;
         @Nullable
         private final String message;
         @Nullable
         private final RuntimeException cause;
 
-        private RollbackResult(Status status, @Nullable String message, @Nullable RuntimeException cause) {
+        private RollbackResult(Status status, boolean refundMaterial, @Nullable String message, @Nullable RuntimeException cause) {
             this.status = status;
+            this.refundMaterial = refundMaterial;
             this.message = message;
             this.cause = cause;
         }
 
         public static RollbackResult restored() {
-            return new RollbackResult(Status.RESTORED, null, null);
+            return new RollbackResult(Status.RESTORED, true, null, null);
+        }
+
+        public static RollbackResult alreadyRestored() {
+            return new RollbackResult(Status.RESTORED, false, null, null);
         }
 
         public static RollbackResult notRestored(String message) {
-            return new RollbackResult(Status.NOT_RESTORED, message, null);
+            return new RollbackResult(Status.NOT_RESTORED, false, message, null);
         }
 
         public static RollbackResult failed(String message, RuntimeException cause) {
-            return new RollbackResult(Status.FAILED, message, cause);
+            return new RollbackResult(Status.FAILED, false, message, cause);
         }
 
         public Status getStatus() {
@@ -56,6 +62,10 @@ public interface WandOperation {
 
         public boolean isRestored() {
             return status == Status.RESTORED;
+        }
+
+        public boolean shouldRefundMaterial() {
+            return refundMaterial;
         }
 
         @Nullable
