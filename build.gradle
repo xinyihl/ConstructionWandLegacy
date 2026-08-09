@@ -3,7 +3,7 @@ import org.jetbrains.gradle.ext.Gradle
 plugins {
     id 'java'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.1.7'
-    id 'com.gtnewhorizons.retrofuturagradle' version '1.4.1'
+    id 'com.gtnewhorizons.retrofuturagradle' version '1.4.2'
 }
 
 version = project.mod_version
