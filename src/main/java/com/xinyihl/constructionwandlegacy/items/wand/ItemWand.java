@@ -128,8 +128,8 @@ public abstract class ItemWand extends Item {
             return EnumActionResult.SUCCESS;
         }
 
-        if (ClientEvents.modeKeyCombDown(player)) {
-            return ConstructionWandLegacy.instance.getRuntime().getUndoService().undo(player) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
+        if (player.isSneaking() && ConstructionWandLegacy.instance.getRuntime().getUndoService().undo(player)) {
+            return EnumActionResult.SUCCESS;
         }
 
         RayTraceResult hitResult = new RayTraceResult(new Vec3d(pos).add(hitX, hitY, hitZ), facing, pos);

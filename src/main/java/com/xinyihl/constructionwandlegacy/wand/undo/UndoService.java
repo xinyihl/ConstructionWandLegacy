@@ -89,6 +89,8 @@ public final class UndoService {
     }
 
     public boolean undo(EntityPlayer player) {
+        PlayerEntry entry = getEntry(player.getUniqueID());
+        if (!entry.undoActive) return false;
         boolean changed = undo(player.getUniqueID(), player.world.provider.getDimension(), player.world, player);
         refreshClientIfActive(player);
         return changed;
@@ -112,10 +114,8 @@ public final class UndoService {
     }
 
     public Set<BlockPos> peekLastPositions(EntityPlayer player) {
-        return peekLastPositions(player.getUniqueID(), player.world.provider.getDimension());
-    }
-
-    Set<BlockPos> peekLastPositions(UUID playerId, int dimension) {
+        UUID playerId = player.getUniqueID();
+        int dimension = player.world.provider.getDimension();
         WandTransaction transaction = getEntry(playerId).entries.peekLast();
         if (transaction == null || transaction.getDimension() != dimension) {
             return Collections.emptySet();
